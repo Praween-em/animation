@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>States of Matter — Fixed Heading Animation</title>
+<script src="https://unpkg.com/animejs@3.2.1/lib/anime.min.js"></script>
+<style>
+  :root{
+    --bg:#0e1726; --accent1:#4cc9f0; --accent2:#4895ef; --card: rgba(255,255,255,0.05);
+  }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:#fff;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px;
+    gap:12px;
+  }
+
+  /* MAIN HEADING (wrapper + item model) */
+  h1#mainHeading {
+    margin:0;
+    height:48px;              /* fixed height so slide works */
+    overflow:hidden;
+    display:block;
+    width:100%;
+    max-width:720px;
+    text-align:center;
+    font-size:34px;
+    font-weight:700;
+  }
+  .heading-wrapper {
+    position:relative;
+    height:100%;
+  }
+  .heading-item {
+    position:absolute;
+    left:0; right:0;
+    top:0;
+    width:100%;
+    text-align:center;
+    pointer-events:none;
+  }
+
+  /* SMALL STATE LABEL */
+  .state-label {
+    height:34px;
+    overflow:hidden;
+    width:100%;
+    max-width:720px;
+    display:block;
+    margin-top:2px;
+    text-align:center;
+    font-size:18px;
+    font-weight:600;
+    color: #dbeafe;
+  }
+  .label-wrapper { position:relative; height:100%; }
+  .label-item { position:absolute; left:0; right:0; top:0; width:100%; text-align:center; }
+
+  /* CONTAINER & PARTICLES */
+  .container {
+    width:480px;
+    max-width:92vw;
+    height:320px;
+    border-radius:12px;
+    border:3px solid rgba(255,255,255,0.12);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    position:relative;
+    overflow:hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  }
+  .particle {
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    position:absolute;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--accent1));
+    box-shadow: 0 6px 12px rgba(0,0,0,0.45);
+    will-change: transform, left, top;
+  }
+
+  /* BUTTON */
+  .controls { margin-top:8px; display:flex; gap:12px; align-items:center; }
+  button#changeStateBtn {
+    background: linear-gradient(90deg,var(--accent1),var(--accent2));
+    border:none;
+    color:#07203a;
+    font-weight:700;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow: 0 6px 18px rgba(74,123,180,0.12);
+  }
+  button#changeStateBtn:hover { transform: translateY(-2px); transition: transform .18s ease; }
+
+  /* DESCRIPTION (wrapper + item) */
+  .description {
+    width:100%;
+    max-width:720px;
+    background:var(--card);
+    border-radius:10px;
+    padding:16px;
+    min-height:120px;
+    box-sizing:border-box;
+  }
+  .desc-wrapper { position:relative; min-height:88px; overflow:hidden; }
+  .desc-item {
+    position:absolute; left:0; right:0; top:0;
+    width:100%;
+  }
+  ul { margin:0; padding-left:18px; color:#e6f6ff; }
+  li { margin-bottom:8px; line-height:1.45; }
+
+  /* small responsive tweaks */
+  @media (max-width:560px){
+    h1#mainHeading { font-size:22px; height:40px; }
+    .container { height:260px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MAIN HEADING (wrapper + item) -->
+<h1 id="mainHeading">
+  <div class="heading-wrapper" id="headingWrapper">
+    <div class="heading-item" aria-hidden="false">Solid State of Matter</div>
+  </div>
+</h1>
+
+<!-- SMALL STATE LABEL -->
+<div class="state-label">
+  <div class="label-wrapper" id="labelWrapper">
+    <div class="label-item">Solid</div>
+  </div>
+</div>
+
+<!-- PARTICLE STAGE -->
+<div class="container" id="container" aria-label="Particle container"></div>
+
+<!-- Controls -->
+<div class="controls">
+  <button id="changeStateBtn">Change to Liquid</button>
+</div>
+
+<!-- DESCRIPTION -->
+<div class="description">
+  <div class="desc-wrapper" id="descWrapper">
+    <div class="desc-item">
+      <ul>
+        <li>Particles are closely packed and fixed in position.</li>
+        <li>Definite shape and definite volume.</li>
+        <li>Particles vibrate but do not move freely.</li>
+        <li>Strong intermolecular forces.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- SETTINGS & STATE ---------- */
+const STATES = ["Solid","Liquid","Gas"];
+const STATE_INFO = {
+  Solid: [
+    "Particles are closely packed and fixed in position.",
+    "Definite shape and definite volume.",
+    "Particles vibrate but do not move freely.",
+    "Strong intermolecular forces."
+  ],
+  Liquid: [
+    "Particles are close but can slide past each other.",
+    "No definite shape, but definite volume.",
+    "Flows to take the shape of its container.",
+    "Moderate intermolecular forces."
+  ],
+  Gas: [
+    "Particles are far apart and move freely.",
+    "No definite shape or volume.",
+    "Fills the entire container.",
+    "Very weak intermolecular forces."
+  ]
+};
+
+let currentStateIndex = 0;
+const numParticles = 36;
+const particles = [];
+
+/* ---------- DOM refs ---------- */
+const headingWrapper = document.getElementById('headingWrapper');
+const labelWrapper = document.getElementById('labelWrapper');
+const descWrapper = document.getElementById('descWrapper');
+const container = document.getElementById('container');
+const btn = document.getElementById('changeStateBtn');
+
+/* ---------- utility: animated text swap (wrapper-based) ---------- */
+/* wrapperEl: element that holds .*-item children
+   newHTML: html string for new item
+   opts: durations
+*/
+function swapTextWithSlide(wrapperEl, newHTML, opts = {}) {
+  const outDur = opts.outDur ?? 300;
+  const inDur = opts.inDur ?? 300;
+  const easing = opts.easing ?? 'easeInOutQuad';
+
+  // create new item (start below, invisible)
+  const newItem = document.createElement('div');
+  newItem.className = wrapperEl === descWrapper ? 'desc-item' : (wrapperEl === headingWrapper ? 'heading-item' : 'label-item');
+  newItem.style.transform = 'translateY(30px)';
+  newItem.style.opacity = '0';
+  newItem.innerHTML = newHTML;
+  wrapperEl.appendChild(newItem);
+
+  // find existing items (except the newly appended)
+  const oldItems = Array.from(wrapperEl.children).filter(c => c !== newItem);
+
+  // timeline: animate old items up & fade, new item in from below
+  const tl = anime.timeline();
+
+  if (oldItems.length) {
+    tl.add({
+      targets: oldItems,
+      translateY: -30,
+      opacity: 0,
+      duration: outDur,
+      easing: easing,
+      delay: anime.stagger(40)
+    });
+  }
+  tl.add({
+    targets: newItem,
+    translateY: [30, 0],
+    opacity: [0, 1],
+    duration: inDur,
+    easing: easing,
+    offset: `-=${Math.min(outDur, inDur)}`
+  });
+
+  // cleanup: remove old nodes at end
+  tl.finished.then(() => {
+    oldItems.forEach(n => n.remove());
+  }).catch(()=>{/*ignore*/});
+}
+
+/* ---------- PARTICLE CREATION ---------- */
+function createParticles() {
+  // remove old
+  container.innerHTML = '';
+  particles.length = 0;
+
+  for (let i=0;i<numParticles;i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    // start off-screen center, will be arranged on state
+    p.style.left = '50%';
+    p.style.top = '50%';
+    container.appendChild(p);
+    particles.push(p);
+  }
+}
+
+/* ---------- STOP ALL PARTICLE ANIMATIONS ---------- */
+function stopParticleAnimations() {
+  // anime.remove stops animations on these nodes (including loops)
+  anime.remove(particles);
+  // also clear any inline transform left/top left by anime (we'll reset when arranging)
+}
+
+/* ---------- ARRANGE: SOLID ---------- */
+function arrangeSolid() {
+  const W = container.clientWidth, H = container.clientHeight;
+  const cols = 6;
+  const rows = Math.ceil(numParticles / cols);
+  const spacingX = W / (cols + 1);
+  const spacingY = H / (rows + 1);
+
+  particles.forEach((p, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const targetX = Math.round(spacingX * (col + 1));
+    const targetY = Math.round(spacingY * (row + 1));
+    // move to grid position
+    anime({
+      targets: p,
+      left: `${targetX}px`,
+      top: `${targetY}px`,
+      translateX: 0,
+      translateY: 0,
+      duration: 700,
+      easing: 'easeInOutQuad',
+      complete: () => {
+        // small vibration loop (no drift)
+        anime({
+          targets: p,
+          translateX: [
+            { value: -2, duration: 300 },
+            { value: 2, duration: 300 },
+            { value: 0, duration: 300 }
+          ],
+          translateY: [
+            { value: -2, duration: 320 },
+            { value: 2, duration: 320 },
+            { value: 0, duration: 320 }
+          ],
+          loop: true,
+          easing: 'easeInOutSine'
+        });
+      }
+    });
+  });
+}
+
+/* ---------- ARRANGE: LIQUID ---------- */
+function floatAround(el, range=24, dur=2000) {
+  anime({
+    targets: el,
+    translateX: (Math.random()-0.5)*range,
+    translateY: (Math.random()-0.5)*range,
+    duration: dur + Math.random()*800,
+    direction: 'alternate',
+    easing: 'easeInOutSine',
+    loop: true
+  });
+}
+
+function arrangeLiquid() {
+  const W = container.clientWidth, H = container.clientHeight;
+  particles.forEach(p => {
+    anime({
+      targets: p,
+      left: `${Math.random()*(W-14)}px`,
+      top: `${Math.random()*(H-14)}px`,
+      translateX: 0,
+      translateY: 0,
+      duration: 700 + Math.random()*200,
+      easing: 'easeInOutQuad',
+      complete: () => floatAround(p, 28, 1800 + Math.random()*1200)
+    });
+  });
+}
+
+/* ---------- ARRANGE: GAS ---------- */
+function moveRandomly(el, W, H) {
+  anime({
+    targets: el,
+    left: `${Math.random()*(W-14)}px`,
+    top: `${Math.random()*(H-14)}px`,
+    duration: 1200 + Math.random()*2200,
+    easing: 'linear',
+    complete: () => {
+      // continue only if animation wasn't removed
+      moveRandomly(el, W, H);
+    }
+  });
+}
+
+function arrangeGas() {
+  const W = container.clientWidth, H = container.clientHeight;
+  particles.forEach(p => {
+    // give each particle a first random placement then keep moving
+    anime({
+      targets: p,
+      left: `${Math.random()*(W-14)}px`,
+      top: `${Math.random()*(H-14)}px`,
+      duration: 400,
+      easing: 'easeOutQuad',
+      complete: () => moveRandomly(p, W, H)
+    });
+  });
+}
+
+/* ---------- MAIN: set state (handles stopping old animations) ---------- */
+function setState(stateName) {
+  stopParticleAnimations(); // kill loops/old tweens
+  // swap heading (big) and small label and description
+  swapTextWithSlide(headingWrapper, `${stateName} State of Matter`, { outDur:300, inDur:360});
+  swapTextWithSlide(labelWrapper, stateName, { outDur:260, inDur:320 });
+  const descHtml = `<ul>${STATE_INFO[stateName].map(s => `<li>${s}</li>`).join('')}</ul>`;
+  swapTextWithSlide(descWrapper, descHtml, { outDur:260, inDur:320 });
+
+  // arrange particles after a short delay to let text animate slightly (makes transition feel smoother)
+  setTimeout(() => {
+    if (stateName === 'Solid') arrangeSolid();
+    else if (stateName === 'Liquid') arrangeLiquid();
+    else if (stateName === 'Gas') arrangeGas();
+  }, 120);
+}
+
+/* ---------- BUTTON ---------- */
+btn.addEventListener('click', () => {
+  currentStateIndex = (currentStateIndex + 1) % STATES.length;
+  const next = STATES[currentStateIndex];
+  setState(next);
+  const nextLabel = STATES[(currentStateIndex + 1) % STATES.length];
+  btn.textContent = `Change to ${nextLabel}`;
+});
+
+/* ---------- INIT ---------- */
+createParticles();
+setState('Solid'); // initial
+btn.textContent = `Change to ${STATES[1]}`;
+
+/* ---------- keep layout responsive on resize ---------- */
+let resizeTimer = null;
+window.addEventListener('resize', ()=> {
+  // small debounce and re-arrange to keep layout consistent
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=> {
+    // re-apply current arrangement (stop previous animations first)
+    const state = STATES[currentStateIndex];
+    setState(state);
+  }, 220);
+});
+</script>
+</body>
+</html>
