@@ -2,160 +2,173 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>States of Matter — Responsive</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>States of Matter — Responsive Mobile-first</title>
+<!-- anime.js CDN -->
 <script src="https://unpkg.com/animejs@3.2.1/lib/anime.min.js"></script>
 <style>
-  :root {
+  /* ========== Mobile-first responsive styles ========== */
+  :root{
     --bg: #0e1726;
     --accent1: #4cc9f0;
     --accent2: #4895ef;
-    --card: rgba(255, 255, 255, 0.05);
+    --card: rgba(255,255,255,0.05);
+    --muted: rgba(255,255,255,0.85);
   }
+  * { box-sizing: border-box; }
+  html,body { height:100%; margin:0; }
   body {
-    margin: 0;
-    min-height: 100vh;
+    min-height:100vh;
     background: var(--bg);
     color: #fff;
-    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 4vw 3vw;
-    gap: 2vw;
+    font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    padding:12px;
   }
 
-  /* MAIN HEADING */
-  h1#mainHeading {
-    margin: 0;
-    height: clamp(36px, 6vw, 60px);
-    overflow: hidden;
-    width: 100%;
-    max-width: 900px;
-    text-align: center;
-    font-size: clamp(20px, 4.5vw, 42px);
-    font-weight: 700;
+  /* MAIN HEADING (big, animating) */
+  #mainHeading {
+    width:100%;
+    max-width:880px;
+    height:44px;                 /* fixed height to allow smooth vertical slide */
+    margin:0;
+    overflow:hidden;
+    text-align:center;
+    font-weight:700;
+    font-size:clamp(18px,5.5vw,34px);
+    line-height:44px;
   }
-  .heading-wrapper {
-    position: relative;
-    height: 100%;
-  }
+  .heading-wrapper { position:relative; height:100%; }
   .heading-item {
-    position: absolute;
-    left: 0; right: 0;
-    top: 0;
-    width: 100%;
-    text-align: center;
-    pointer-events: none;
+    position:absolute; left:0; right:0; top:0;
+    width:100%; text-align:center; pointer-events:none;
   }
 
-  /* SMALL STATE LABEL */
+  /* SMALL LABEL under heading */
   .state-label {
-    height: clamp(24px, 4vw, 38px);
-    overflow: hidden;
-    width: 100%;
-    max-width: 900px;
-    text-align: center;
-    font-size: clamp(14px, 2.5vw, 20px);
-    font-weight: 600;
-    color: #dbeafe;
+    width:100%;
+    max-width:880px;
+    height:30px;
+    overflow:hidden;
+    font-size:clamp(13px,4vw,18px);
+    text-align:center;
+    color:#dbeafe;
+    font-weight:600;
   }
-  .label-wrapper { position: relative; height: 100%; }
-  .label-item { position: absolute; left: 0; right: 0; top: 0; width: 100%; }
+  .label-wrapper { position:relative; height:100%; }
+  .label-item { position:absolute; left:0; right:0; top:0; width:100%; text-align:center; }
 
   /* PARTICLE CONTAINER */
   .container {
-    width: min(90vw, 500px);
-    height: min(60vh, 380px);
-    border-radius: 12px;
-    border: 3px solid rgba(255, 255, 255, 0.12);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    width: min(94vw, 520px);
+    height: min(56vh, 360px);
+    max-height: 72vh;
+    border-radius:12px;
+    border: 3px solid rgba(255,255,255,0.10);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    position:relative;
+    overflow:hidden;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
   }
   .particle {
-    width: clamp(10px, 2vw, 14px);
-    height: clamp(10px, 2vw, 14px);
-    border-radius: 50%;
-    position: absolute;
+    width: clamp(10px, 3.2vw, 14px);
+    height: clamp(10px, 3.2vw, 14px);
+    border-radius:50%;
+    position:absolute;
     background: radial-gradient(circle at 30% 30%, #fff, var(--accent1));
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.45);
     will-change: transform, left, top;
   }
 
-  /* BUTTON */
-  .controls { margin-top: 1vw; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
-  button#changeStateBtn {
-    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  /* Controls */
+  .controls {
+    display:flex; gap:10px; align-items:center; justify-content:center; width:100%; max-width:880px;
+  }
+  #changeStateBtn {
+    background: linear-gradient(90deg,var(--accent1),var(--accent2));
     border: none;
     color: #07203a;
-    font-weight: 700;
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: clamp(14px, 2.5vw, 18px);
-    box-shadow: 0 6px 18px rgba(74, 123, 180, 0.12);
+    font-weight:800;
+    padding: 10px 16px;
+    border-radius:10px;
+    font-size: clamp(14px, 3.8vw, 16px);
+    cursor:pointer;
+    box-shadow: 0 8px 30px rgba(74,123,180,0.12);
+    touch-action: manipulation;
   }
-  button#changeStateBtn:hover { transform: translateY(-2px); transition: transform .18s ease; }
+  #changeStateBtn:active { transform: translateY(1px); }
 
-  /* DESCRIPTION */
+  /* Description box */
   .description {
-    width: 100%;
-    max-width: 900px;
+    width:100%;
+    max-width:880px;
     background: var(--card);
-    border-radius: 10px;
-    padding: 1rem;
-    min-height: 120px;
-    box-sizing: border-box;
-    font-size: clamp(14px, 2.2vw, 18px);
+    border-radius:12px;
+    padding: clamp(10px, 3.5vw, 16px);
+    box-sizing:border-box;
+    font-size: clamp(13px, 3vw, 17px);
+    line-height:1.45;
+    word-wrap: break-word;
+    min-height: clamp(86px, 16vh, 140px); /* flexible */
   }
-  .desc-wrapper { position: relative; min-height: 88px; overflow: hidden; }
-  .desc-item { position: absolute; left: 0; right: 0; top: 0; width: 100%; }
-  ul { margin: 0; padding-left: 1.2rem; color: #e6f6ff; }
-  li { margin-bottom: 0.5rem; line-height: 1.45; }
+  .desc-wrapper { position:relative; overflow:hidden; min-height:80px; }
+  .desc-item { position:absolute; left:0; right:0; top:0; width:100%; }
+  ul { margin:0; padding-left:1.05rem; color:#e6f6ff; }
+  li { margin-bottom:0.55rem; }
 
-  /* SMALL DEVICES */
-  @media (max-width: 480px) {
-    body { padding: 5vw 4vw; gap: 3vw; }
-    .controls { flex-direction: column; align-items: center; }
-    .description { padding: 0.8rem; }
+  /* Larger screens adjustments */
+  @media (min-width:720px){
+    body { padding:22px; gap:16px; }
+    #mainHeading { height:56px; line-height:56px; font-size:clamp(22px,3.5vw,36px); }
+    .state-label { height:34px; font-size:18px; }
+    .container { width: min(82vw, 640px); height: min(56vh, 420px); }
   }
 </style>
 </head>
 <body>
-<h1 id="mainHeading">
-  <div class="heading-wrapper" id="headingWrapper">
-    <div class="heading-item">Solid State of Matter</div>
-  </div>
-</h1>
 
-<div class="state-label">
-  <div class="label-wrapper" id="labelWrapper">
-    <div class="label-item">Solid</div>
-  </div>
-</div>
+  <!-- MAIN HEADING (wrapper + initial item) -->
+  <h1 id="mainHeading" aria-live="polite">
+    <div class="heading-wrapper" id="headingWrapper">
+      <div class="heading-item">Solid State of Matter</div>
+    </div>
+  </h1>
 
-<div class="container" id="container"></div>
-
-<div class="controls">
-  <button id="changeStateBtn">Change to Liquid</button>
-</div>
-
-<div class="description">
-  <div class="desc-wrapper" id="descWrapper">
-    <div class="desc-item">
-      <ul>
-        <li>Particles are closely packed and fixed in position.</li>
-        <li>Definite shape and definite volume.</li>
-        <li>Particles vibrate but do not move freely.</li>
-        <li>Strong intermolecular forces.</li>
-      </ul>
+  <!-- SMALL STATE LABEL -->
+  <div class="state-label" aria-hidden="false">
+    <div class="label-wrapper" id="labelWrapper">
+      <div class="label-item">Solid</div>
     </div>
   </div>
-</div>
+
+  <!-- PARTICLE STAGE -->
+  <div class="container" id="container" role="img" aria-label="Particles in container representing state of matter"></div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button id="changeStateBtn" aria-controls="container description headingWrapper labelWrapper">Change to Liquid</button>
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="description" aria-live="polite">
+    <div class="desc-wrapper" id="descWrapper">
+      <div class="desc-item">
+        <ul>
+          <li>Particles are closely packed and fixed in position.</li>
+          <li>Definite shape and definite volume.</li>
+          <li>Particles vibrate but do not move freely.</li>
+          <li>Strong intermolecular forces.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
 <script>
-const STATES = ["Solid", "Liquid", "Gas"];
+/* ===================== Settings & Data ===================== */
+const STATES = ['Solid','Liquid','Gas'];
 const STATE_INFO = {
   Solid: [
     "Particles are closely packed and fixed in position.",
@@ -177,61 +190,230 @@ const STATE_INFO = {
   ]
 };
 
-let currentStateIndex = 0;
-const numParticles = 36;
-const particles = [];
+/* responsive particle count heuristic (keeps mobile tidy) */
+function calcParticleCount(containerWidth) {
+  // mobile narrow: fewer particles, medium and large: more
+  if (containerWidth < 340) return 18;
+  if (containerWidth < 420) return 24;
+  if (containerWidth < 520) return 30;
+  return 36; // desktop
+}
 
+/* ========== DOM refs ========== */
 const headingWrapper = document.getElementById('headingWrapper');
 const labelWrapper = document.getElementById('labelWrapper');
 const descWrapper = document.getElementById('descWrapper');
 const container = document.getElementById('container');
 const btn = document.getElementById('changeStateBtn');
 
+let currentStateIndex = 0;
+let particles = [];            // DOM nodes
+let currentParticleCount = 0;
+
+/* ========== Utility: robust swap with slide & crossfade ========== */
 function swapTextWithSlide(wrapperEl, newHTML, opts = {}) {
   const outDur = opts.outDur ?? 300;
-  const inDur = opts.inDur ?? 300;
+  const inDur  = opts.inDur  ?? 340;
   const easing = opts.easing ?? 'easeInOutQuad';
 
+  // Determine class for new item
+  const cls = wrapperEl === descWrapper ? 'desc-item' : (wrapperEl === headingWrapper ? 'heading-item' : 'label-item');
+
+  // create new node (start below, invisible)
   const newItem = document.createElement('div');
-  newItem.className =
-    wrapperEl === descWrapper
-      ? 'desc-item'
-      : wrapperEl === headingWrapper
-      ? 'heading-item'
-      : 'label-item';
-  newItem.style.transform = 'translateY(30px)';
+  newItem.className = cls;
+  newItem.style.transform = 'translateY(28px)';
   newItem.style.opacity = '0';
   newItem.innerHTML = newHTML;
   wrapperEl.appendChild(newItem);
 
+  // old items (everything except newly appended)
   const oldItems = Array.from(wrapperEl.children).filter(c => c !== newItem);
 
-  const tl = anime.timeline();
+  // timeline: old items up & fade; new item in from below
+  const tl = anime.timeline({ autoplay:true });
+
   if (oldItems.length) {
     tl.add({
       targets: oldItems,
-      translateY: -30,
+      translateY: -28,
       opacity: 0,
       duration: outDur,
-      easing: easing,
-      delay: anime.stagger(40)
+      easing,
+      delay: anime.stagger(30)
     });
   }
   tl.add({
     targets: newItem,
-    translateY: [30, 0],
-    opacity: [0, 1],
+    translateY: [28,0],
+    opacity: [0,1],
     duration: inDur,
-    easing: easing,
+    easing,
     offset: `-=${Math.min(outDur, inDur)}`
   });
-  tl.finished.then(() => oldItems.forEach(n => n.remove()));
+
+  tl.finished.then(() => {
+    // cleanup old nodes
+    oldItems.forEach(n => n.remove());
+  }).catch(()=>{/*ignore*/});
 }
 
+/* ================= Particle lifecycle ================= */
+
+/* create particle nodes based on currentParticleCount */
 function createParticles() {
+  // clear existing
   container.innerHTML = '';
-  particles.length = 0;
-  for (let i = 0; i < numParticles; i++) {
+  particles = [];
+  for (let i=0;i<currentParticleCount;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    // initial placement in center
+    p.style.left = '50%';
+    p.style.top  = '50%';
+    container.appendChild(p);
+    particles.push(p);
+  }
+}
+
+/* stop all anime animations on particles */
+function stopParticleAnimations(){
+  anime.remove(particles);
+}
+
+/* arrange Solid: grid with tiny vibration (no drift) */
+function arrangeSolid(){
+  const W = container.clientWidth, H = container.clientHeight;
+  const cols = Math.min(6, Math.ceil(Math.sqrt(currentParticleCount)));
+  const rows = Math.ceil(currentParticleCount / cols);
+  const spacingX = W / (cols + 1);
+  const spacingY = H / (rows + 1);
+
+  particles.forEach((p,i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const targetX = Math.round(spacingX * (col + 1));
+    const targetY = Math.round(spacingY * (row + 1));
+    anime({
+      targets: p,
+      left: `${targetX}px`,
+      top:  `${targetY}px`,
+      translateX: 0, translateY: 0,
+      duration: 600,
+      easing: 'easeInOutQuad',
+      complete: () => {
+        anime({
+          targets: p,
+          translateX: [
+            { value: -2, duration: 300 },
+            { value: 2, duration: 300 },
+            { value: 0, duration: 300 }
+          ],
+          translateY: [
+            { value: -2, duration: 320 },
+            { value: 2, duration: 320 },
+            { value: 0, duration: 320 }
+          ],
+          easing: 'easeInOutSine',
+          loop: true
+        });
+      }
+    });
+  });
+}
+
+/* liquid: random but close positions + gentle float */
+function floatAround(el, range=22, dur=1800) {
+  anime({
+    targets: el,
+    translateX: (Math.random()-0.5)*range,
+    translateY: (Math.random()-0.5)*range,
+    duration: dur + Math.random()*900,
+    direction: 'alternate',
+    easing: 'easeInOutSine',
+    loop: true
+  });
+}
+function arrangeLiquid(){
+  const W = container.clientWidth, H = container.clientHeight;
+  particles.forEach(p => {
+    anime({
+      targets: p,
+      left: `${Math.random() * Math.max(1, (W - p.clientWidth))}px`,
+      top:  `${Math.random() * Math.max(1, (H - p.clientHeight))}px`,
+      translateX: 0, translateY: 0,
+      duration: 700 + Math.random()*300,
+      easing: 'easeInOutQuad',
+      complete: () => floatAround(p, 28, 1700 + Math.random()*1200)
+    });
+  });
+}
+
+/* gas: free linear motion, continuous */
+function moveRandomly(el, W, H){
+  anime({
+    targets: el,
+    left: `${Math.random() * Math.max(1, (W - el.clientWidth))}px`,
+    top:  `${Math.random() * Math.max(1, (H - el.clientHeight))}px`,
+    duration: 1100 + Math.random()*2600,
+    easing: 'linear',
+    complete: () => {
+      // continue moving only if node still exists (prevents errors on removal)
+      if (document.body.contains(el)) moveRandomly(el, W, H);
+    }
+  });
+}
+function arrangeGas(){
+  const W = container.clientWidth, H = container.clientHeight;
+  particles.forEach(p => {
+    anime({
+      targets: p,
+      left: `${Math.random() * Math.max(1, (W - p.clientWidth))}px`,
+      top:  `${Math.random() * Math.max(1, (H - p.clientHeight))}px`,
+      duration: 400 + Math.random()*600,
+      easing: 'easeOutQuad',
+      complete: () => moveRandomly(p, W, H)
+    });
+  });
+}
+
+/* ========== Primary state setter (syncs text + particles) ========== */
+function setState(stateName) {
+  // stop running particle loops
+  stopParticleAnimations();
+
+  // visual swaps (heading, small label, description)
+  swapTextWithSlide(headingWrapper, `${stateName} State of Matter`, { outDur:300, inDur:360 });
+  swapTextWithSlide(labelWrapper, stateName, { outDur:260, inDur:320 });
+  const descHtml = `<ul>${STATE_INFO[stateName].map(s => `<li>${s}</li>`).join('')}</ul>`;
+  swapTextWithSlide(descWrapper, descHtml, { outDur:260, inDur:320 });
+
+  // arrange particles slightly after text begins to move for nicer feel
+  setTimeout(() => {
+    if (stateName === 'Solid') arrangeSolid();
+    else if (stateName === 'Liquid') arrangeLiquid();
+    else arrangeGas();
+  }, 120);
+}
+
+/* ========== Initialization & Resize handling ========== */
+function init() {
+  // determine particle count based on container width
+  const cw = container.clientWidth;
+  const desired = calcParticleCount(cw);
+
+  currentParticleCount = desired;
+  createParticles();
+  // initial state
+  setState('Solid');
+  btn.textContent = `Change to ${STATES[1]}`;
+}
+
+/* createParticles uses currentParticleCount */
+function createParticles(){
+  container.innerHTML = '';
+  particles = [];
+  for (let i=0;i<currentParticleCount;i++){
     const p = document.createElement('div');
     p.className = 'particle';
     p.style.left = '50%';
@@ -241,108 +423,25 @@ function createParticles() {
   }
 }
 
-function stopParticleAnimations() {
-  anime.remove(particles);
-}
+/* Debounced resize: if particle count should change, recreate, else re-arrange */
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const cw = container.clientWidth;
+    const desired = calcParticleCount(cw);
+    if (desired !== currentParticleCount) {
+      // recreate with new count
+      currentParticleCount = desired;
+      createParticles();
+    }
+    // re-apply current arrangement
+    const state = STATES[currentStateIndex];
+    setState(state);
+  }, 160);
+});
 
-function arrangeSolid() {
-  const W = container.clientWidth, H = container.clientHeight;
-  const cols = 6;
-  const rows = Math.ceil(numParticles / cols);
-  const spacingX = W / (cols + 1);
-  const spacingY = H / (rows + 1);
-  particles.forEach((p, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    const targetX = spacingX * (col + 1);
-    const targetY = spacingY * (row + 1);
-    anime({
-      targets: p,
-      left: `${targetX}px`,
-      top: `${targetY}px`,
-      translateX: 0,
-      translateY: 0,
-      duration: 700,
-      easing: 'easeInOutQuad',
-      complete: () => {
-        anime({
-          targets: p,
-          translateX: [{ value: -2 }, { value: 2 }, { value: 0 }],
-          translateY: [{ value: -2 }, { value: 2 }, { value: 0 }],
-          duration: 300,
-          loop: true,
-          easing: 'easeInOutSine'
-        });
-      }
-    });
-  });
-}
-
-function floatAround(el, range = 24, dur = 2000) {
-  anime({
-    targets: el,
-    translateX: (Math.random() - 0.5) * range,
-    translateY: (Math.random() - 0.5) * range,
-    duration: dur + Math.random() * 800,
-    direction: 'alternate',
-    easing: 'easeInOutSine',
-    loop: true
-  });
-}
-
-function arrangeLiquid() {
-  const W = container.clientWidth, H = container.clientHeight;
-  particles.forEach(p => {
-    anime({
-      targets: p,
-      left: `${Math.random() * (W - 14)}px`,
-      top: `${Math.random() * (H - 14)}px`,
-      duration: 700 + Math.random() * 200,
-      easing: 'easeInOutQuad',
-      complete: () => floatAround(p, 28, 1800 + Math.random() * 1200)
-    });
-  });
-}
-
-function moveRandomly(el, W, H) {
-  anime({
-    targets: el,
-    left: `${Math.random() * (W - 14)}px`,
-    top: `${Math.random() * (H - 14)}px`,
-    duration: 1200 + Math.random() * 2200,
-    easing: 'linear',
-    complete: () => moveRandomly(el, W, H)
-  });
-}
-
-function arrangeGas() {
-  const W = container.clientWidth, H = container.clientHeight;
-  particles.forEach(p => {
-    anime({
-      targets: p,
-      left: `${Math.random() * (W - 14)}px`,
-      top: `${Math.random() * (H - 14)}px`,
-      duration: 400,
-      easing: 'easeOutQuad',
-      complete: () => moveRandomly(p, W, H)
-    });
-  });
-}
-
-function setState(stateName) {
-  stopParticleAnimations();
-  swapTextWithSlide(headingWrapper, `${stateName} State of Matter`);
-  swapTextWithSlide(labelWrapper, stateName);
-  const descHtml = `<ul>${STATE_INFO[stateName].map(s => `<li>${s}</li>`).join('')}</ul>`;
-  swapTextWithSlide(descWrapper, descHtml);
-
-  setTimeout(() => {
-    if (stateName === 'Solid') arrangeSolid();
-    else if (stateName === 'Liquid') arrangeLiquid();
-    else arrangeGas();
-  }, 120);
-}
-
+/* button click cycling */
 btn.addEventListener('click', () => {
   currentStateIndex = (currentStateIndex + 1) % STATES.length;
   const next = STATES[currentStateIndex];
@@ -350,14 +449,11 @@ btn.addEventListener('click', () => {
   btn.textContent = `Change to ${STATES[(currentStateIndex + 1) % STATES.length]}`;
 });
 
-createParticles();
-setState('Solid');
-btn.textContent = `Change to ${STATES[1]}`;
+/* init on DOM ready */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else init();
 
-window.addEventListener('resize', () => {
-  const state = STATES[currentStateIndex];
-  setState(state);
-});
 </script>
 </body>
 </html>
