@@ -2,151 +2,168 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Distance, Displacement, Speed & Velocity — Interactive Learning</title>
+  <title>Interactive Physics — Reference Point & Distance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f6f7fb;color:#131522;line-height:1.5}
     header{background:#1f2937;color:#fff;padding:14px 18px}
     h1{margin:0;font-size:20px}
     .wrap{max-width:920px;margin:16px auto;padding:0 12px}
-    canvas{display:block;width:100%;max-width:900px;height:320px;background:#e0f2fe;border:2px solid #1f2937;border-radius:10px;margin:12px 0}
+    canvas{display:block;width:100%;max-width:900px;height:320px;background:#cce6ff;border:2px solid #1f2937;border-radius:10px;margin:12px 0}
     .panel{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:16px}
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .cell{flex:1;min-width:240px}
     label{display:inline-block;min-width:150px}
     input[type=range]{width:220px}
-    button{padding:6px 14px;border:none;background:#2563eb;color:#fff;border-radius:6px;cursor:pointer;margin-right:8px}
-    .note{font-size:13px;color:#6b7280;margin-top:4px}
+    button{padding:6px 10px;margin:4px 2px;cursor:pointer;border:1px solid #ccc;border-radius:6px;background:#f3f4f6}
     .metric{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin-top:8px}
-    table{border-collapse:collapse;width:100%;margin-top:8px}
-    th,td{border:1px solid #ccc;padding:6px;text-align:center}
     code{background:#eef2ff;padding:0 4px;border-radius:4px}
     ul{padding-left:20px}
   </style>
 </head>
 <body>
-  <header><h1>Distance, Displacement, Speed & Velocity — Interactive Learning</h1></header>
+  <header><h1>Interactive Physics Learning</h1></header>
   <div class="wrap">
-    
-    <div class="panel">
-      <h2>Concept Overview</h2>
-      <p><b>Distance</b> is the total length of the path traveled, regardless of direction (scalar).</p>
-      <p><b>Displacement</b> is the shortest straight-line change from start to end, including direction (vector).</p>
-      <p><b>Speed</b> = Distance / Time, scalar; <b>Velocity</b> = Displacement / Time, vector.</p>
-    </div>
 
+    <!-- Concept 1 -->
     <div class="panel">
-      <h2>Key Differences</h2>
-      <table>
-        <tr><th>Feature</th><th>Distance</th><th>Displacement</th><th>Speed</th><th>Velocity</th></tr>
-        <tr><td>Quantity type</td><td>Scalar</td><td>Vector</td><td>Scalar</td><td>Vector</td></tr>
-        <tr><td>Direction considered?</td><td>No</td><td>Yes</td><td>No</td><td>Yes</td></tr>
-        <tr><td>Can be zero?</td><td>No</td><td>Yes</td><td>No</td><td>Yes</td></tr>
-      </table>
-    </div>
-
-    <div class="panel">
-      <h2>Real-Life Examples</h2>
+      <h2>Concept 1 — Reference Point & Motion</h2>
+      <p><b>Motion</b> is the change in position of an object with respect to a <b>reference point</b> over time.</p>
       <ul>
-        <li>Jogging one lap on a track (400 m) → Distance = 400 m, Displacement = 0.</li>
-        <li>Driving to a store 5 km away and back → Distance = 10 km, Displacement = 0.</li>
-        <li>Speedometer shows speed, GPS shows velocity (with direction).</li>
+        <li><b>Reference Point:</b> A stationary object or position used as a basis to measure motion.</li>
+        <li><b>Relative Motion:</b> Motion described in relation to a chosen reference point.</li>
+        <li><b>Relative Velocity:</b> The velocity of one object as seen from another moving object, given by <code>v<sub>B|A</sub> = v<sub>B</sub> − v<sub>A</sub></code>.</li>
+      </ul>
+      <p><b>Example:</b> In a moving train, another train moving at the same speed in the same direction appears stationary.</p>
+    </div>
+
+    <canvas id="canvas1" width="900" height="320"></canvas>
+    <div class="panel">
+      <div class="row">
+        <div class="cell">
+          <h3>Controls</h3>
+          <div><label>Observer A speed</label>
+            <input type="range" id="obsASpeed" min="-5" max="5" step="0.1" value="0">
+            <span id="obsASpeedValue">0</span> m/s
+          </div>
+          <div><label>Observer B speed</label>
+            <input type="range" id="obsBSpeed" min="-5" max="5" step="0.1" value="0">
+            <span id="obsBSpeedValue">0</span> m/s
+          </div>
+          <div><label>Object speed</label>
+            <input type="range" id="objSpeed" min="-5" max="5" step="0.1" value="2">
+            <span id="objSpeedValue">2</span> m/s
+          </div>
+          <button id="start1">Start</button>
+          <button id="pause1">Pause</button>
+          <button id="reset1">Reset</button>
+        </div>
+        <div class="cell">
+          <h3>Metrics</h3>
+          <div class="metric" id="mA"></div>
+          <div class="metric" id="mB"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 2 -->
+    <div class="panel">
+      <h2>Concept 2 — Distance</h2>
+      <p><b>Distance</b> is the total length of the path traveled by an object, irrespective of direction. It is always positive and is a scalar quantity.</p>
+      <p><b>Formula:</b> <code>Distance = Total path length</code></p>
+      <ul>
+        <li>Running 400m on a straight track → Distance = 400m</li>
+        <li>Walking 5m forward and 5m back → Distance = 10m</li>
       </ul>
     </div>
 
-    <div class="panel">
-      <h2>Interactive Simulation</h2>
-      <p>Move the object along the track, change its speed and direction, and see the live calculation of Distance, Displacement, Speed, and Velocity.</p>
-    </div>
-
-    <canvas id="canvas" width="900" height="320"></canvas>
-
+    <canvas id="canvas2" width="900" height="320"></canvas>
     <div class="panel">
       <div class="row">
         <div class="cell">
           <h3>Controls</h3>
           <div><label>Object speed</label>
-            <input type="range" id="objSpeed" min="-5" max="5" step="0.1" value="2">
-            <span id="objSpeedValue">2</span> m/s
+            <input type="range" id="distSpeed" min="-5" max="5" step="0.1" value="2">
+            <span id="distSpeedValue">2</span> m/s
           </div>
-          <div style="margin-top:8px;">
-            <button id="toggleBtn">Pause</button>
-            <button id="resetBtn">Reset</button>
-          </div>
+          <button id="start2">Start</button>
+          <button id="pause2">Pause</button>
+          <button id="reset2">Reset</button>
         </div>
         <div class="cell">
-          <h3>Live Metrics</h3>
-          <div class="metric" id="mDistance"></div>
-          <div class="metric" id="mDisplacement"></div>
-          <div class="metric" id="mSpeed"></div>
-          <div class="metric" id="mVelocity"></div>
+          <h3>Metrics</h3>
+          <div class="metric" id="distMetric"></div>
+          <div class="metric" id="timeMetric"></div>
+          <div class="metric" id="avgSpeedMetric"></div>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
-    const C = document.getElementById('canvas'), ctx = C.getContext('2d');
-    const obj = { x:100, y:200, v:2, color:'#ef4444', r:14 };
-    let startX = obj.x;
-    let totalDistance = 0;
-    let running = true;
-    let lastTime = null;
+    // ---- Concept 1 Simulation ----
+    const C1 = document.getElementById('canvas1'), ctx1 = C1.getContext('2d');
+    const obsA = { x:120, y:200, v:0, color:'#2563eb', label:'Observer A' };
+    const obsB = { x:360, y:200, v:0, color:'#10b981', label:'Observer B' };
+    const obj  = { x:720, y:200, v:2, color:'#ef4444', label:'Object' };
+    let run1 = false;
 
-    const speedIn = document.getElementById('objSpeed'), speedVal = document.getElementById('objSpeedValue');
-    const mDistance = document.getElementById('mDistance');
-    const mDisplacement = document.getElementById('mDisplacement');
-    const mSpeed = document.getElementById('mSpeed');
-    const mVelocity = document.getElementById('mVelocity');
-    const toggleBtn = document.getElementById('toggleBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    document.getElementById('obsASpeed').oninput = e => { obsA.v = parseFloat(e.target.value); obsASpeedValue.textContent = obsA.v.toFixed(2); };
+    document.getElementById('obsBSpeed').oninput = e => { obsB.v = parseFloat(e.target.value); obsBSpeedValue.textContent = obsB.v.toFixed(2); };
+    document.getElementById('objSpeed').oninput  = e => { obj.v  = parseFloat(e.target.value); objSpeedValue.textContent  = obj.v.toFixed(2); };
+    document.getElementById('start1').onclick = () => run1 = true;
+    document.getElementById('pause1').onclick = () => run1 = false;
+    document.getElementById('reset1').onclick = () => { obsA.x=120; obsB.x=360; obj.x=720; run1=false; };
 
-    speedIn.oninput=()=>{ obj.v=parseFloat(speedIn.value); speedVal.textContent=obj.v.toFixed(2); };
-
-    toggleBtn.onclick=()=>{ running = !running; toggleBtn.textContent = running ? 'Pause' : 'Resume'; };
-    resetBtn.onclick=()=>{
-      obj.x = startX; totalDistance = 0; lastTime = null;
-    };
-
-    function drawTrack(){
-      ctx.strokeStyle='#9ca3af'; ctx.setLineDash([8,8]);
-      ctx.beginPath(); ctx.moveTo(20,240); ctx.lineTo(C.width-20,240); ctx.stroke(); ctx.setLineDash([]);
+    function drawEntity(e, ctx){
+      ctx.beginPath(); ctx.arc(e.x,e.y,14,0,Math.PI*2);
+      ctx.fillStyle=e.color; ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#111827'; ctx.font='12px system-ui'; ctx.fillText(e.label, e.x-36, e.y-20);
     }
-    function drawObj(){
-      ctx.beginPath(); ctx.arc(obj.x,obj.y,obj.r,0,Math.PI*2);
-      ctx.fillStyle=obj.color; ctx.fill(); ctx.strokeStyle='#111827'; ctx.stroke();
-      ctx.fillStyle='#111827'; ctx.font='12px system-ui'; ctx.fillText("Object", obj.x-20, obj.y-20);
+    function updateEntity(e){ e.x += e.v; if(e.x > C1.width+16) e.x = -16; if(e.x < -16) e.x = C1.width+16; }
+    function loop1(){
+      ctx1.clearRect(0,0,C1.width,C1.height);
+      ctx1.strokeStyle='#9ca3af'; ctx1.setLineDash([8,8]);
+      ctx1.beginPath(); ctx1.moveTo(20,240); ctx1.lineTo(C1.width-20,240); ctx1.stroke(); ctx1.setLineDash([]);
+      if(run1){ updateEntity(obsA); updateEntity(obsB); updateEntity(obj); }
+      drawEntity(obsA,ctx1); drawEntity(obsB,ctx1); drawEntity(obj,ctx1);
+      mA.innerHTML = `<b>Relative to A:</b> ${(obj.v - obsA.v).toFixed(2)} m/s`;
+      mB.innerHTML = `<b>Relative to B:</b> ${(obj.v - obsB.v).toFixed(2)} m/s`;
+      requestAnimationFrame(loop1);
     }
-    function update(dt){
-      const prevX = obj.x;
-      obj.x += obj.v * dt * 60; // speed scale
-      if(obj.x > C.width-20) obj.x = C.width-20;
-      if(obj.x < 20) obj.x = 20;
-      totalDistance += Math.abs(obj.x - prevX);
+    loop1();
+
+    // ---- Concept 2 Simulation ----
+    const C2 = document.getElementById('canvas2'), ctx2 = C2.getContext('2d');
+    const distObj = { x:100, y:200, v:2, color:'#ef4444' };
+    let totalDist = 0, prevX = distObj.x, run2 = false, lastT=null, simT=0;
+
+    document.getElementById('distSpeed').oninput = e => { distObj.v = parseFloat(e.target.value); distSpeedValue.textContent = distObj.v.toFixed(2); };
+    document.getElementById('start2').onclick = () => { run2 = true; lastT = null; };
+    document.getElementById('pause2').onclick = () => run2 = false;
+    document.getElementById('reset2').onclick = () => { distObj.x=100; totalDist=0; simT=0; prevX=100; run2=false; lastT=null; };
+
+    function loop2(ts){
+      ctx2.clearRect(0,0,C2.width,C2.height);
+      ctx2.strokeStyle='#9ca3af'; ctx2.setLineDash([8,8]);
+      ctx2.beginPath(); ctx2.moveTo(20,240); ctx2.lineTo(C2.width-20,240); ctx2.stroke(); ctx2.setLineDash([]);
+      if(run2){
+        if(lastT!==null) simT += (ts-lastT)/1000;
+        distObj.x += distObj.v;
+        totalDist += Math.abs(distObj.x - prevX);
+        prevX = distObj.x;
+        if(distObj.x > C2.width+16) distObj.x = -16;
+        if(distObj.x < -16) distObj.x = C2.width+16;
+      }
+      lastT = ts;
+      ctx2.beginPath(); ctx2.arc(distObj.x, distObj.y, 14, 0, Math.PI*2);
+      ctx2.fillStyle = distObj.color; ctx2.fill(); ctx2.stroke();
+      distMetric.innerHTML = `<b>Total Distance:</b> ${totalDist.toFixed(2)} px`;
+      timeMetric.innerHTML = `<b>Time:</b> ${simT.toFixed(2)} s`;
+      avgSpeedMetric.innerHTML = `<b>Average Speed:</b> ${(totalDist/(simT||1)).toFixed(2)} px/s`;
+      requestAnimationFrame(loop2);
     }
-    function animate(timestamp){
-      if(!lastTime) lastTime = timestamp;
-      const dt = (timestamp - lastTime)/1000;
-      lastTime = timestamp;
-      ctx.clearRect(0,0,C.width,C.height);
-      drawTrack();
-      if(running) update(dt);
-      drawObj();
-
-      const displacement = obj.x - startX;
-      const timeElapsed = (performance.now() - performance.timing.navigationStart)/1000; // rough total time
-      const speed = totalDistance / timeElapsed;
-      const velocity = displacement / timeElapsed;
-
-      mDistance.innerHTML = `<b>Distance:</b> ${totalDistance.toFixed(2)} px`;
-      mDisplacement.innerHTML = `<b>Displacement:</b> ${displacement.toFixed(2)} px`;
-      mSpeed.innerHTML = `<b>Speed:</b> ${speed.toFixed(2)} px/s`;
-      mVelocity.innerHTML = `<b>Velocity:</b> ${velocity.toFixed(2)} px/s`;
-
-      requestAnimationFrame(animate);
-    }
-    animate();
+    loop2();
   </script>
 </body>
 </html>
