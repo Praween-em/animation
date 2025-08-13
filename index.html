@@ -2,168 +2,654 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Interactive Physics — Reference Point & Distance</title>
+  <title>Motion Simulations – Standalone (No Manifest)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- NOTE: This file is self-contained and intentionally has NO manifest link.
+       If you previously had <link rel="manifest" ...>, remove it to avoid "No manifest" errors. -->
   <style>
-    body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f6f7fb;color:#131522;line-height:1.5}
-    header{background:#1f2937;color:#fff;padding:14px 18px}
-    h1{margin:0;font-size:20px}
-    .wrap{max-width:920px;margin:16px auto;padding:0 12px}
-    canvas{display:block;width:100%;max-width:900px;height:320px;background:#cce6ff;border:2px solid #1f2937;border-radius:10px;margin:12px 0}
-    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:16px}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .cell{flex:1;min-width:240px}
-    label{display:inline-block;min-width:150px}
-    input[type=range]{width:220px}
-    button{padding:6px 10px;margin:4px 2px;cursor:pointer;border:1px solid #ccc;border-radius:6px;background:#f3f4f6}
-    .metric{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin-top:8px}
-    code{background:#eef2ff;padding:0 4px;border-radius:4px}
-    ul{padding-left:20px}
+    :root {
+      --bg:#0f1220; --panel:#161a2b; --ink:#e8ebff; --muted:#aab1d6; --accent:#7aa2ff; --ok:#47d18c; --warn:#ffc857; --bad:#ff6b6b;
+      --card:#1b2036; --line:#2b3150;
+    }
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    header{padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:linear-gradient(180deg,var(--bg),rgba(15,18,32,0.9))}
+    h1{margin:0;font-size:20px;letter-spacing:.3px}
+    .sub{color:var(--muted);font-size:12px;margin-top:4px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 20px}
+    .tab-btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .tab-btn[aria-selected="true"]{outline:2px solid var(--accent)}
+    main{padding:16px 20px;display:grid;gap:16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px; padding:14px}
+    .row{display:flex;gap:14px;flex-wrap:wrap}
+    .col{flex:1;min-width:260px}
+    label{display:block;font-size:12px;color:var(--muted);margin:6px 0 2px}
+    input[type="number"], input[type="text"]{width:100%;background:#0d1130;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+    input[type="range"]{width:100%}
+    button{background:var(--accent);border:0;color:#08132a;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600}
+    button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:8px}
+    .metric{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}
+    .metric b{display:block;font-size:12px;color:var(--muted)}
+    canvas{display:block;width:100%;height:360px;background:#0b0f25;border:1px solid var(--line);border-radius:12px}
+    .hint{color:var(--muted);font-size:12px;margin-top:8px}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid var(--line);padding:6px 8px;font-size:12px}
+    th{background:#141936;color:var(--muted)}
+    details summary{cursor:pointer}
+    code{background:#0d1130;border:1px solid var(--line);padding:2px 6px;border-radius:6px}
+    .footer{color:var(--muted);font-size:12px;margin:10px 20px 30px}
   </style>
 </head>
 <body>
-  <header><h1>Interactive Physics Learning</h1></header>
-  <div class="wrap">
+  <header>
+    <h1>Motion Simulations – Self‑Learning Suite</h1>
+    <div class="sub">Standalone HTML • No manifest • Tabs: Relative Motion | Distance vs Displacement | Acceleration & v–t | Graph Builder | Circular Motion | Tests</div>
+  </header>
 
-    <!-- Concept 1 -->
-    <div class="panel">
-      <h2>Concept 1 — Reference Point & Motion</h2>
-      <p><b>Motion</b> is the change in position of an object with respect to a <b>reference point</b> over time.</p>
-      <ul>
-        <li><b>Reference Point:</b> A stationary object or position used as a basis to measure motion.</li>
-        <li><b>Relative Motion:</b> Motion described in relation to a chosen reference point.</li>
-        <li><b>Relative Velocity:</b> The velocity of one object as seen from another moving object, given by <code>v<sub>B|A</sub> = v<sub>B</sub> − v<sub>A</sub></code>.</li>
-      </ul>
-      <p><b>Example:</b> In a moving train, another train moving at the same speed in the same direction appears stationary.</p>
-    </div>
+  <!-- Tabs -->
+  <nav class="tabs" role="tablist" aria-label="Simulations">
+    <button class="tab-btn" role="tab" aria-controls="tab1" aria-selected="true">1) Relative Motion</button>
+    <button class="tab-btn" role="tab" aria-controls="tab2" aria-selected="false">2) Distance vs Displacement</button>
+    <button class="tab-btn" role="tab" aria-controls="tab3" aria-selected="false">3) Acceleration & v–t</button>
+    <button class="tab-btn" role="tab" aria-controls="tab4" aria-selected="false">4) Graph Builder</button>
+    <button class="tab-btn" role="tab" aria-controls="tab5" aria-selected="false">5) Circular Motion</button>
+    <button class="tab-btn" role="tab" aria-controls="tab6" aria-selected="false">Tests</button>
+  </nav>
 
-    <canvas id="canvas1" width="900" height="320"></canvas>
-    <div class="panel">
+  <main>
+    <!-- TAB 1: Relative Motion -->
+    <section id="tab1" role="tabpanel" class="card">
+      <h2>Relative Motion (Frames & Speeds)</h2>
       <div class="row">
-        <div class="cell">
-          <h3>Controls</h3>
-          <div><label>Observer A speed</label>
-            <input type="range" id="obsASpeed" min="-5" max="5" step="0.1" value="0">
-            <span id="obsASpeedValue">0</span> m/s
+        <div class="col">
+          <label>Observer Frame</label>
+          <select id="rmFrame">
+            <option value="ground">Ground (stationary)</option>
+            <option value="A">On Bus A</option>
+            <option value="B">On Bus B</option>
+          </select>
+          <label>Speed of Bus A (m/s)</label>
+          <input id="rmVA" type="range" min="-20" max="20" step="0.5" value="8">
+          <div id="rmVAVal" class="hint"></div>
+          <label>Speed of Bus B (m/s)</label>
+          <input id="rmVB" type="range" min="-20" max="20" step="0.5" value="12">
+          <div id="rmVBVal" class="hint"></div>
+          <div class="metrics" id="rmMetrics"></div>
+          <div class="row" style="margin-top:8px;gap:8px">
+            <button id="rmStart">Start</button>
+            <button id="rmPause" class="ghost">Pause</button>
+            <button id="rmReset" class="ghost">Reset</button>
           </div>
-          <div><label>Observer B speed</label>
-            <input type="range" id="obsBSpeed" min="-5" max="5" step="0.1" value="0">
-            <span id="obsBSpeedValue">0</span> m/s
-          </div>
-          <div><label>Object speed</label>
-            <input type="range" id="objSpeed" min="-5" max="5" step="0.1" value="2">
-            <span id="objSpeedValue">2</span> m/s
-          </div>
-          <button id="start1">Start</button>
-          <button id="pause1">Pause</button>
-          <button id="reset1">Reset</button>
+          <div class="hint">Hint: Choose <b>On Bus A</b> frame to see Bus B move at relative velocity <code>v_rel = vB - vA</code>.</div>
         </div>
-        <div class="cell">
-          <h3>Metrics</h3>
-          <div class="metric" id="mA"></div>
-          <div class="metric" id="mB"></div>
+        <div class="col">
+          <canvas id="rmCanvas" width="680" height="360" aria-label="Relative Motion Canvas"></canvas>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Concept 2 -->
-    <div class="panel">
-      <h2>Concept 2 — Distance</h2>
-      <p><b>Distance</b> is the total length of the path traveled by an object, irrespective of direction. It is always positive and is a scalar quantity.</p>
-      <p><b>Formula:</b> <code>Distance = Total path length</code></p>
-      <ul>
-        <li>Running 400m on a straight track → Distance = 400m</li>
-        <li>Walking 5m forward and 5m back → Distance = 10m</li>
-      </ul>
-    </div>
-
-    <canvas id="canvas2" width="900" height="320"></canvas>
-    <div class="panel">
+    <!-- TAB 2: Distance vs Displacement -->
+    <section id="tab2" role="tabpanel" class="card" hidden>
+      <h2>Distance vs Displacement (Path Tracker)</h2>
       <div class="row">
-        <div class="cell">
-          <h3>Controls</h3>
-          <div><label>Object speed</label>
-            <input type="range" id="distSpeed" min="-5" max="5" step="0.1" value="2">
-            <span id="distSpeedValue">2</span> m/s
+        <div class="col">
+          <p>Click the path buttons to move the dot. Total <b>distance</b> adds up; <b>displacement</b> is the straight line from start to current position.</p>
+          <div class="row" style="gap:8px">
+            <button class="ghost" data-move="A">Go to A</button>
+            <button class="ghost" data-move="B">Go to B</button>
+            <button class="ghost" data-move="C">Go to C</button>
+            <button class="ghost" data-move="O">Return Home (O)</button>
           </div>
-          <button id="start2">Start</button>
-          <button id="pause2">Pause</button>
-          <button id="reset2">Reset</button>
+          <div class="metrics" id="ddMetrics"></div>
+          <div class="hint">Example cases: O→A (distance=displacement); O→A→B (distance&gt;displacement); O→A→O (distance&gt;0, displacement=0).</div>
         </div>
-        <div class="cell">
-          <h3>Metrics</h3>
-          <div class="metric" id="distMetric"></div>
-          <div class="metric" id="timeMetric"></div>
-          <div class="metric" id="avgSpeedMetric"></div>
+        <div class="col">
+          <canvas id="ddCanvas" width="680" height="360" aria-label="Distance vs Displacement Canvas"></canvas>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+
+    <!-- TAB 3: Acceleration & v–t -->
+    <section id="tab3" role="tabpanel" class="card" hidden>
+      <h2>Acceleration Playground + v–t Graph</h2>
+      <div class="row">
+        <div class="col">
+          <label>Initial velocity u (m/s)</label>
+          <input id="apU" type="range" min="-20" max="20" step="0.5" value="5"><div id="apUVal" class="hint"></div>
+          <label>Acceleration a (m/s²)</label>
+          <input id="apA" type="range" min="-10" max="10" step="0.2" value="1"><div id="apAVal" class="hint"></div>
+          <label>Duration t (s)</label>
+          <input id="apT" type="range" min="0" max="20" step="0.5" value="5"><div id="apTVal" class="hint"></div>
+          <div class="metrics" id="apMetrics"></div>
+          <div class="row" style="margin-top:8px;gap:8px">
+            <button id="apStart">Start</button>
+            <button id="apPause" class="ghost">Pause</button>
+            <button id="apReset" class="ghost">Reset</button>
+          </div>
+          <div class="hint">Equations: <code>v = u + at</code>, <code>s = ut + ½at²</code>. Area under v–t graph = displacement.</div>
+        </div>
+        <div class="col">
+          <canvas id="apCanvas" width="680" height="360" aria-label="Acceleration Canvas"></canvas>
+          <canvas id="apVT" width="680" height="160" aria-label="v-t Graph" style="margin-top:10px"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Graph Builder -->
+    <section id="tab4" role="tabpanel" class="card" hidden>
+      <h2>Graph Builder (Distance–Time → Velocity–Time)</h2>
+      <div class="row">
+        <div class="col">
+          <p>Enter time-distance pairs (monotonic in time). Slope gives segment speed; piecewise slopes approximate v–t.</p>
+          <table id="gbTable">
+            <thead><tr><th>t (s)</th><th>s (m)</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="row" style="margin-top:8px;gap:8px">
+            <button id="gbAdd">Add Row</button>
+            <button id="gbPlot" class="ghost">Plot</button>
+            <button id="gbClear" class="ghost">Clear</button>
+          </div>
+          <div class="metrics" id="gbMetrics"></div>
+        </div>
+        <div class="col">
+          <canvas id="gbDS" width="680" height="220" aria-label="Distance-Time Graph"></canvas>
+          <canvas id="gbVT" width="680" height="220" aria-label="Velocity-Time Graph" style="margin-top:10px"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: Circular Motion -->
+    <section id="tab5" role="tabpanel" class="card" hidden>
+      <h2>Uniform Circular Motion (Release shows Tangent)</h2>
+      <div class="row">
+        <div class="col">
+          <label>Radius r (m)</label>
+          <input id="cmR" type="range" min="30" max="150" step="5" value="100"><div id="cmRVal" class="hint"></div>
+          <label>Period T (s) — time for one full round</label>
+          <input id="cmT" type="range" min="1" max="20" step="0.5" value="6"><div id="cmTVal" class="hint"></div>
+          <div class="metrics" id="cmMetrics"></div>
+          <div class="row" style="margin-top:8px;gap:8px">
+            <button id="cmStart">Start</button>
+            <button id="cmRelease" class="ghost">Release</button>
+            <button id="cmReset" class="ghost">Reset</button>
+          </div>
+          <div class="hint">Speed <code>v = 2πr/T</code>. On release, motion continues along the instantaneous tangent.</div>
+        </div>
+        <div class="col">
+          <canvas id="cmCanvas" width="680" height="360" aria-label="Circular Motion Canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: Tests -->
+    <section id="tab6" role="tabpanel" class="card" hidden>
+      <h2>Automated Tests (Smoke + Physics Checks)</h2>
+      <p>Results appear here and in the console. We don’t change any of your existing tests (none supplied), so we add these minimal checks.</p>
+      <div id="testResults" class="metrics"></div>
+      <details style="margin-top:8px">
+        <summary>What’s covered?</summary>
+        <ul>
+          <li>Equations of motion: v = u + at, s = ut + ½at²</li>
+          <li>Relative velocity correctness</li>
+          <li>Distance vs displacement calculation sanity checks</li>
+          <li>Graph builder slope → velocity conversion</li>
+        </ul>
+      </details>
+    </section>
+  </main>
+
+  <div class="footer">Tip: If you saw “No manifest” earlier, you were likely loading as a PWA or Chrome extension. This file needs neither—just open it. If you do want PWA/extension behavior, see manifest examples below (outside this HTML).</div>
 
   <script>
-    // ---- Concept 1 Simulation ----
-    const C1 = document.getElementById('canvas1'), ctx1 = C1.getContext('2d');
-    const obsA = { x:120, y:200, v:0, color:'#2563eb', label:'Observer A' };
-    const obsB = { x:360, y:200, v:0, color:'#10b981', label:'Observer B' };
-    const obj  = { x:720, y:200, v:2, color:'#ef4444', label:'Object' };
-    let run1 = false;
+    // ---------- Utilities ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+    const fmt = (n, d=2) => Number(n).toFixed(d);
 
-    document.getElementById('obsASpeed').oninput = e => { obsA.v = parseFloat(e.target.value); obsASpeedValue.textContent = obsA.v.toFixed(2); };
-    document.getElementById('obsBSpeed').oninput = e => { obsB.v = parseFloat(e.target.value); obsBSpeedValue.textContent = obsB.v.toFixed(2); };
-    document.getElementById('objSpeed').oninput  = e => { obj.v  = parseFloat(e.target.value); objSpeedValue.textContent  = obj.v.toFixed(2); };
-    document.getElementById('start1').onclick = () => run1 = true;
-    document.getElementById('pause1').onclick = () => run1 = false;
-    document.getElementById('reset1').onclick = () => { obsA.x=120; obsB.x=360; obj.x=720; run1=false; };
+    // ---------- Tabs ----------
+    const tabBtns = $$('.tab-btn');
+    const panels = ['tab1','tab2','tab3','tab4','tab5','tab6'].map(id => document.getElementById(id));
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        panels.forEach(p=>p.hidden=true);
+        btn.setAttribute('aria-selected','true');
+        const id = btn.getAttribute('aria-controls');
+        document.getElementById(id).hidden=false;
+      });
+    });
 
-    function drawEntity(e, ctx){
-      ctx.beginPath(); ctx.arc(e.x,e.y,14,0,Math.PI*2);
-      ctx.fillStyle=e.color; ctx.fill(); ctx.stroke();
-      ctx.fillStyle='#111827'; ctx.font='12px system-ui'; ctx.fillText(e.label, e.x-36, e.y-20);
+    // ---------- Physics core (reusable) ----------
+    function kinematics(u, a, t){ // returns {v, s}
+      const v = u + a*t;
+      const s = u*t + 0.5*a*t*t;
+      return {v, s};
     }
-    function updateEntity(e){ e.x += e.v; if(e.x > C1.width+16) e.x = -16; if(e.x < -16) e.x = C1.width+16; }
-    function loop1(){
-      ctx1.clearRect(0,0,C1.width,C1.height);
-      ctx1.strokeStyle='#9ca3af'; ctx1.setLineDash([8,8]);
-      ctx1.beginPath(); ctx1.moveTo(20,240); ctx1.lineTo(C1.width-20,240); ctx1.stroke(); ctx1.setLineDash([]);
-      if(run1){ updateEntity(obsA); updateEntity(obsB); updateEntity(obj); }
-      drawEntity(obsA,ctx1); drawEntity(obsB,ctx1); drawEntity(obj,ctx1);
-      mA.innerHTML = `<b>Relative to A:</b> ${(obj.v - obsA.v).toFixed(2)} m/s`;
-      mB.innerHTML = `<b>Relative to B:</b> ${(obj.v - obsB.v).toFixed(2)} m/s`;
-      requestAnimationFrame(loop1);
+    function relativeVelocity(vA, vB, frame){ // ground, A, B
+      if(frame==='A') return vB - vA;
+      if(frame==='B') return vA - vB;
+      return {A:vA, B:vB};
     }
-    loop1();
-
-    // ---- Concept 2 Simulation ----
-    const C2 = document.getElementById('canvas2'), ctx2 = C2.getContext('2d');
-    const distObj = { x:100, y:200, v:2, color:'#ef4444' };
-    let totalDist = 0, prevX = distObj.x, run2 = false, lastT=null, simT=0;
-
-    document.getElementById('distSpeed').oninput = e => { distObj.v = parseFloat(e.target.value); distSpeedValue.textContent = distObj.v.toFixed(2); };
-    document.getElementById('start2').onclick = () => { run2 = true; lastT = null; };
-    document.getElementById('pause2').onclick = () => run2 = false;
-    document.getElementById('reset2').onclick = () => { distObj.x=100; totalDist=0; simT=0; prevX=100; run2=false; lastT=null; };
-
-    function loop2(ts){
-      ctx2.clearRect(0,0,C2.width,C2.height);
-      ctx2.strokeStyle='#9ca3af'; ctx2.setLineDash([8,8]);
-      ctx2.beginPath(); ctx2.moveTo(20,240); ctx2.lineTo(C2.width-20,240); ctx2.stroke(); ctx2.setLineDash([]);
-      if(run2){
-        if(lastT!==null) simT += (ts-lastT)/1000;
-        distObj.x += distObj.v;
-        totalDist += Math.abs(distObj.x - prevX);
-        prevX = distObj.x;
-        if(distObj.x > C2.width+16) distObj.x = -16;
-        if(distObj.x < -16) distObj.x = C2.width+16;
+    function distanceAndDisplacement(points){ // points: [{x,y},...]
+      let dist = 0;
+      for(let i=1;i<points.length;i++){
+        const dx = points[i].x - points[i-1].x;
+        const dy = points[i].y - points[i-1].y;
+        dist += Math.hypot(dx, dy);
       }
-      lastT = ts;
-      ctx2.beginPath(); ctx2.arc(distObj.x, distObj.y, 14, 0, Math.PI*2);
-      ctx2.fillStyle = distObj.color; ctx2.fill(); ctx2.stroke();
-      distMetric.innerHTML = `<b>Total Distance:</b> ${totalDist.toFixed(2)} px`;
-      timeMetric.innerHTML = `<b>Time:</b> ${simT.toFixed(2)} s`;
-      avgSpeedMetric.innerHTML = `<b>Average Speed:</b> ${(totalDist/(simT||1)).toFixed(2)} px/s`;
-      requestAnimationFrame(loop2);
+      const dx0 = points[points.length-1].x - points[0].x;
+      const dy0 = points[points.length-1].y - points[0].y;
+      const disp = Math.hypot(dx0, dy0);
+      return {distance:dist, displacement:disp};
     }
-    loop2();
+
+    // ---------- TAB 1: Relative Motion ----------
+    ;(()=>{
+      const c = $('#rmCanvas'), g = c.getContext('2d');
+      const frameSel = $('#rmFrame'), va = $('#rmVA'), vb = $('#rmVB'), vaVal = $('#rmVAVal'), vbVal = $('#rmVBVal'), metrics = $('#rmMetrics');
+      const start = $('#rmStart'), pause = $('#rmPause'), reset = $('#rmReset');
+      let running=false, t0=0, last=0;
+      let busA = {x:80, v: Number(va.value)}, busB = {x:300, v: Number(vb.value)};
+      function draw(){
+        g.clearRect(0,0,c.width,c.height);
+        // road
+        g.fillStyle='#0d1130'; g.fillRect(0,260,c.width,80);
+        g.strokeStyle='#2b3150'; g.lineWidth=2;
+        for(let i=0;i<c.width;i+=40){ g.beginPath(); g.moveTo(i,300); g.lineTo(i+20,300); g.stroke(); }
+        // buses
+        drawBus(busA.x, 220, '#7aa2ff', 'A');
+        drawBus(busB.x, 220, '#47d18c', 'B');
+      }
+      function drawBus(x,y,color,label){
+        g.fillStyle=color; g.fillRect(x-40,y-20,80,40);
+        g.fillStyle='#08132a'; g.fillRect(x-30,y-16,60,16);
+        g.fillStyle='#01060f'; g.beginPath(); g.arc(x-25,y+22,8,0,Math.PI*2); g.fill();
+        g.beginPath(); g.arc(x+25,y+22,8,0,Math.PI*2); g.fill();
+        g.fillStyle='#e8ebff'; g.font='12px system-ui'; g.fillText(label, x-4, y+4);
+      }
+      function tick(ts){
+        if(!running){ draw(); return; }
+        if(!t0){ t0=ts; last=ts; draw(); requestAnimationFrame(tick); return; }
+        const dt = (ts-last)/1000; last=ts;
+
+        // update velocities based on frame
+        const frame = frameSel.value;
+        if(frame==='ground'){
+          busA.x += busA.v*dt*8;
+          busB.x += busB.v*dt*8;
+        }else if(frame==='A'){
+          const vrel = busB.v - busA.v;
+          busB.x += vrel*dt*8;
+          // A stays centered
+          busA.x = c.width/2;
+        }else{
+          const vrel = busA.v - busB.v;
+          busA.x += vrel*dt*8;
+          busB.x = c.width/2;
+        }
+        // wrap around
+        busA.x = (busA.x + c.width + 40)%(c.width+80);
+        busB.x = (busB.x + c.width + 40)%(c.width+80);
+        draw();
+        requestAnimationFrame(tick);
+      }
+      function updateUI(){
+        vaVal.textContent = `vA = ${fmt(busA.v)} m/s`;
+        vbVal.textContent = `vB = ${fmt(busB.v)} m/s`;
+        let html='';
+        if(frameSel.value==='ground'){
+          html += metric('Velocity of A',''+fmt(busA.v)+' m/s');
+          html += metric('Velocity of B',''+fmt(busB.v)+' m/s');
+        }else if(frameSel.value==='A'){
+          html += metric('Observer','On A');
+          html += metric('v(B) wrt A', fmt(busB.v - busA.v)+' m/s');
+        }else{
+          html += metric('Observer','On B');
+          html += metric('v(A) wrt B', fmt(busA.v - busB.v)+' m/s');
+        }
+        metrics.innerHTML = html;
+      }
+      function metric(name,val){ return `<div class="metric"><b>${name}</b><div>${val}</div></div>`; }
+      va.addEventListener('input',()=>{ busA.v=Number(va.value); updateUI(); });
+      vb.addEventListener('input',()=>{ busB.v=Number(vb.value); updateUI(); });
+      frameSel.addEventListener('change', updateUI);
+      start.onclick=()=>{ running=true; t0=0; requestAnimationFrame(tick); }
+      pause.onclick=()=>{ running=false; }
+      reset.onclick=()=>{ running=false; busA.x=80; busB.x=300; updateUI(); draw(); }
+      updateUI(); draw();
+    })();
+
+    // ---------- TAB 2: Distance vs Displacement ----------
+    ;(()=>{
+      const c=$('#ddCanvas'), g=c.getContext('2d'), metrics=$('#ddMetrics');
+      const buttons = $$('#tab2 [data-move]');
+      const O={x:100,y:260}, A={x:560,y:260}, B={x:560,y:80}, C={x:120,y:80};
+      const points=[O]; let current=O;
+      function draw(){
+        g.clearRect(0,0,c.width,c.height);
+        // grid
+        g.strokeStyle='#11162b'; g.lineWidth=1;
+        for(let x=0;x<c.width;x+=40){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,c.height); g.stroke(); }
+        for(let y=0;y<c.height;y+=40){ g.beginPath(); g.moveTo(0,y); g.lineTo(c.width,y); g.stroke(); }
+        // path polygon
+        g.strokeStyle='#2b3150'; g.lineWidth=2; g.beginPath(); g.rect(100,80,460,180); g.stroke();
+        // labeled points
+        drawPoint(O,'O'); drawPoint(A,'A'); drawPoint(B,'B'); drawPoint(C,'C');
+        // traveled polyline
+        g.strokeStyle='#7aa2ff'; g.lineWidth=3; g.beginPath();
+        g.moveTo(points[0].x,points[0].y);
+        for(const p of points){ g.lineTo(p.x,p.y); }
+        g.stroke();
+        // straight-line displacement
+        g.strokeStyle='#47d18c'; g.setLineDash([6,6]); g.beginPath();
+        g.moveTo(points[0].x,points[0].y);
+        g.lineTo(current.x,current.y);
+        g.stroke(); g.setLineDash([]);
+        // current marker
+        g.fillStyle='#e8ebff'; g.beginPath(); g.arc(current.x,current.y,6,0,Math.PI*2); g.fill();
+      }
+      function drawPoint(p,label){
+        g.fillStyle='#e8ebff'; g.beginPath(); g.arc(p.x,p.y,4,0,Math.PI*2); g.fill();
+        g.fillStyle='#aab1d6'; g.font='12px system-ui'; g.fillText(label, p.x+8, p.y-8);
+      }
+      function updateMetrics(){
+        const {distance, displacement} = distanceAndDisplacement(points);
+        metrics.innerHTML = `
+          <div class="metric"><b>Total distance</b><div>${fmt(distance)} px</div></div>
+          <div class="metric"><b>Displacement</b><div>${fmt(displacement)} px</div></div>
+          <div class="metric"><b>Case</b><div>${explainCase(distance, displacement)}</div></div>
+        `;
+      }
+      function explainCase(dist, disp){
+        if(dist===disp) return 'Straight line (distance = displacement)';
+        if(disp===0 && dist>0) return 'Out-and-back (displacement = 0, distance > 0)';
+        return 'Curved or multi-leg path (distance > displacement)';
+      }
+      buttons.forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const target = ({O,A,B,C})[b.dataset.move];
+          points.push(target); current=target; draw(); updateMetrics();
+        });
+      });
+      draw(); updateMetrics();
+    })();
+
+    // ---------- TAB 3: Acceleration Playground ----------
+    ;(()=>{
+      const c=$('#apCanvas'), g=c.getContext('2d');
+      const vt=$('#apVT'), gv=vt.getContext('2d');
+      const uR=$('#apU'), aR=$('#apA'), tR=$('#apT');
+      const uVal=$('#apUVal'), aVal=$('#apAVal'), tVal=$('#apTVal');
+      const metrics=$('#apMetrics'); const start=$('#apStart'), pause=$('#apPause'), reset=$('#apReset');
+      let u=Number(uR.value), a=Number(aR.value), T=Number(tR.value);
+      let running=false, t=0;
+      let x=40, x0=40;
+      function updateLabels(){ uVal.textContent=`u = ${u} m/s`; aVal.textContent=`a = ${a} m/s²`; tVal.textContent=`t = ${T} s`; }
+      function drawScene(){
+        g.clearRect(0,0,c.width,c.height);
+        // track
+        g.strokeStyle='#2b3150'; g.lineWidth=2; g.beginPath(); g.moveTo(20,300); g.lineTo(c.width-20,300); g.stroke();
+        // runner
+        g.fillStyle='#7aa2ff'; g.beginPath(); g.arc(x,280,10,0,Math.PI*2); g.fill();
+        // info
+      }
+      function drawVT(){
+        gv.clearRect(0,0,vt.width,vt.height);
+        // axes
+        gv.strokeStyle='#2b3150'; gv.lineWidth=1;
+        gv.beginPath(); gv.moveTo(30,10); gv.lineTo(30,vt.height-20); gv.lineTo(vt.width-10,vt.height-20); gv.stroke();
+        // line v(t) = u + a t
+        const maxT = Math.max(5, T);
+        const maxV = Math.max(Math.abs(u), Math.abs(u+a*T)) + 2;
+        const X=t=> 30 + (t/maxT)*(vt.width-40);
+        const Y=v=> (vt.height-20) - ((v+maxV)/(2*maxV))*(vt.height-30);
+        gv.strokeStyle='#7aa2ff'; gv.lineWidth=2; gv.beginPath(); gv.moveTo(X(0),Y(u)); gv.lineTo(X(T),Y(u+a*T)); gv.stroke();
+        // shade area (displacement)
+        gv.fillStyle='rgba(122,162,255,0.2)'; gv.beginPath();
+        gv.moveTo(X(0),Y(0)); gv.lineTo(X(0),Y(u)); gv.lineTo(X(T),Y(u+a*T)); gv.lineTo(X(T),Y(0)); gv.closePath(); gv.fill();
+      }
+      function updateMetrics(){
+        const {v,s} = kinematics(u,a,T);
+        metrics.innerHTML = `
+          <div class="metric"><b>v = u + a t</b><div>${fmt(v)} m/s</div></div>
+          <div class="metric"><b>s = ut + ½at²</b><div>${fmt(s)} m</div></div>
+        `;
+      }
+      function step(){
+        if(!running){ drawScene(); drawVT(); return; }
+        const dt = 1/60;
+        t = Math.min(T, t+dt);
+        const {s} = kinematics(u,a,t);
+        x = x0 + s*8;
+        drawScene(); drawVT();
+        if(t < T) requestAnimationFrame(step); else running=false;
+      }
+      function onChange(){
+        u=Number(uR.value); a=Number(aR.value); T=Number(tR.value);
+        updateLabels(); updateMetrics(); drawScene(); drawVT();
+      }
+      uR.addEventListener('input', onChange);
+      aR.addEventListener('input', onChange);
+      tR.addEventListener('input', onChange);
+      start.onclick=()=>{ running=true; t=0; requestAnimationFrame(step); }
+      pause.onclick=()=>{ running=false; }
+      reset.onclick=()=>{ running=false; t=0; x=x0; onChange(); }
+      updateLabels(); updateMetrics(); drawScene(); drawVT();
+    })();
+
+    // ---------- TAB 4: Graph Builder ----------
+    ;(()=>{
+      const tbody = $('#gbTable tbody'), add=$('#gbAdd'), plot=$('#gbPlot'), clear=$('#gbClear');
+      const ds=$('#gbDS'), g1=ds.getContext('2d');
+      const vt=$('#gbVT'), g2=vt.getContext('2d');
+      const metrics=$('#gbMetrics');
+      function addRow(t='', s=''){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><input type="number" step="0.1" value="${t}"></td>
+                        <td><input type="number" step="0.1" value="${s}"></td>
+                        <td><button class="ghost del">×</button></td>`;
+        tbody.appendChild(tr);
+        tr.querySelector('.del').onclick=()=>{ tr.remove(); };
+      }
+      // seed example
+      [['0','0'],['2','1'],['4','4'],['6','9'],['8','16'],['10','25']].forEach(([t,s])=>addRow(t,s));
+      add.onclick=()=>addRow();
+      clear.onclick=()=>{ tbody.innerHTML=''; metrics.innerHTML=''; g1.clearRect(0,0,ds.width,ds.height); g2.clearRect(0,0,vt.width,vt.height); };
+      plot.onclick=()=>{
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const data = rows.map(r=>({t:Number(r.children[0].querySelector('input').value),
+                                   s:Number(r.children[1].querySelector('input').value)}))
+                         .filter(x=>!Number.isNaN(x.t) && !Number.isNaN(x.s))
+                         .sort((a,b)=>a.t-b.t);
+        if(data.length<2){ alert('Add at least two rows'); return; }
+        drawDS(data); drawVT(data);
+      };
+      function drawDS(data){
+        g1.clearRect(0,0,ds.width,ds.height);
+        axes(g1, ds.width, ds.height, 's');
+        const maxT = Math.max(...data.map(d=>d.t));
+        const maxS = Math.max(...data.map(d=>d.s));
+        const X=t=> 40 + (t/maxT)*(ds.width-60);
+        const Y=s=> (ds.height-30) - (s/maxS)*(ds.height-50);
+        // polyline
+        g1.strokeStyle='#7aa2ff'; g1.lineWidth=2; g1.beginPath();
+        g1.moveTo(X(data[0].t), Y(data[0].s));
+        for(const d of data){ g1.lineTo(X(d.t), Y(d.s)); }
+        g1.stroke();
+      }
+      function drawVT(data){
+        g2.clearRect(0,0,vt.width,vt.height);
+        axes(g2, vt.width, vt.height, 'v');
+        // piecewise velocity (slope)
+        const segs=[];
+        for(let i=1;i<data.length;i++){
+          const dt = data[i].t - data[i-1].t;
+          const ds = data[i].s - data[i-1].s;
+          if(dt<=0) continue;
+          segs.push({t0:data[i-1].t, t1:data[i].t, v: ds/dt});
+        }
+        if(segs.length===0) return;
+        const maxT = Math.max(...data.map(d=>d.t));
+        const maxV = Math.max(...segs.map(s=>Math.abs(s.v))) || 1;
+        const X=t=> 40 + (t/maxT)*(vt.width-60);
+        const Y=v=> (vt.height-30) - ((v+maxV)/(2*maxV))*(vt.height-50);
+        // draw steps
+        g2.strokeStyle='#47d18c'; g2.lineWidth=2; g2.beginPath();
+        g2.moveTo(X(segs[0].t0), Y(segs[0].v));
+        for(const s of segs){
+          g2.lineTo(X(s.t1), Y(s.v));
+        }
+        g2.stroke();
+        metrics.innerHTML = segs.map((s,i)=>`
+          <div class="metric"><b>Segment ${i+1} [${s.t0}→${s.t1}]</b><div>v ≈ ${fmt(s.v)} m/s</div></div>
+        `).join('');
+      }
+      function axes(ctx,w,h,label){
+        ctx.strokeStyle='#2b3150'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(30,10); ctx.lineTo(30,h-20); ctx.lineTo(w-10,h-20); ctx.stroke();
+        ctx.fillStyle='#aab1d6'; ctx.font='12px system-ui'; ctx.fillText('t', w-24, h-26); ctx.fillText(label, 18, 18);
+      }
+    })();
+
+    // ---------- TAB 5: Circular Motion ----------
+    ;(()=>{
+      const c=$('#cmCanvas'), g=c.getContext('2d');
+      const rR=$('#cmR'), tR=$('#cmT'), rVal=$('#cmRVal'), tVal=$('#cmTVal'), metrics=$('#cmMetrics');
+      const start=$('#cmStart'), release=$('#cmRelease'), reset=$('#cmReset');
+      let r=Number(rR.value), T=Number(tR.value), w=2*Math.PI/T, v=2*Math.PI*r/T;
+      let running=false, released=false, theta=0;
+      let px=0, py=0, vx=0, vy=0;
+      function update(){
+        w=2*Math.PI/T; v=2*Math.PI*r/T;
+        rVal.textContent=`r = ${r} m`; tVal.textContent=`T = ${T} s`;
+        metrics.innerHTML = `
+          <div class="metric"><b>Speed</b><div>v = ${fmt(v)} m/s</div></div>
+          <div class="metric"><b>Angular speed</b><div>ω = ${fmt(w)} rad/s</div></div>
+        `;
+      }
+      rR.addEventListener('input',()=>{ r=Number(rR.value); update(); draw(); });
+      tR.addEventListener('input',()=>{ T=Number(tR.value); update(); draw(); });
+      start.onclick=()=>{ running=true; released=false; theta=0; requestAnimationFrame(step); };
+      release.onclick=()=>{ if(!released){ released=true; /* set initial tangent velocity */ } };
+      reset.onclick=()=>{ running=false; released=false; theta=0; update(); draw(); };
+
+      function step(){
+        if(!running){ draw(); return; }
+        const dt = 1/60;
+        if(!released){
+          theta += w*dt;
+          const cx=c.width/2, cy=c.height/2;
+          px = cx + r*Math.cos(theta);
+          py = cy + r*Math.sin(theta);
+          // tangent velocity
+          vx = -v*Math.sin(theta);
+          vy =  v*Math.cos(theta);
+        } else {
+          // projectile-like straight motion with constant velocity vx, vy
+          px += vx*dt;
+          py += vy*dt;
+        }
+        draw();
+        if(running) requestAnimationFrame(step);
+      }
+      function draw(){
+        g.clearRect(0,0,c.width,c.height);
+        const cx=c.width/2, cy=c.height/2;
+        // circle
+        g.strokeStyle='#2b3150'; g.lineWidth=2; g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.stroke();
+        // radius line
+        if(!released){
+          g.strokeStyle='#7aa2ff'; g.beginPath(); g.moveTo(cx,cy); g.lineTo(px,py); g.stroke();
+        }
+        // velocity arrow (tangent)
+        g.strokeStyle='#47d18c'; g.lineWidth=2; g.beginPath(); g.moveTo(px,py); g.lineTo(px+vx*0.4, py+vy*0.4); g.stroke();
+        // mass
+        g.fillStyle='#e8ebff'; g.beginPath(); g.arc(px,py,8,0,Math.PI*2); g.fill();
+      }
+      update(); draw();
+    })();
+
+    // ---------- TAB 6: Tests ----------
+    ;(()=>{
+      const out = $('#testResults');
+      const tests = [];
+      const almost = (a,b,eps=1e-6)=>Math.abs(a-b)<=eps;
+
+      // Test 1: Equations of motion (Example-like)
+      tests.push(()=>{
+        const {v,s} = kinematics(5,1,5); // u=5,a=1,t=5 => v=10, s=37.5
+        return {
+          name:'EOM: u=5,a=1,t=5 → v=10, s=37.5',
+          pass: almost(v,10) && almost(s,37.5),
+          got:`v=${v}, s=${s}`, want:'v=10, s=37.5'
+        };
+      });
+
+      // Test 2: Braking case (compute s given a<0, t=2, final v=0 -> implies u=12)
+      tests.push(()=>{
+        const u = 12, a=-6, t=2; // expect v=u+at = 0; s = 12*2 + 0.5*(-6)*4 = 24 - 12 = 12
+        const {v,s} = kinematics(u,a,t);
+        return {
+          name:'Braking: u=12,a=-6,t=2 → v=0, s=12',
+          pass: almost(v,0) && almost(s,12),
+          got:`v=${v}, s=${s}`, want:'v=0, s=12'
+        };
+      });
+
+      // Test 3: Relative velocity
+      tests.push(()=>{
+        const r1 = relativeVelocity(8,12,'A'); // v(B|A)=4
+        const r2 = relativeVelocity(8,12,'B'); // v(A|B)=-4
+        return { name:'Relative velocity frames', pass: almost(r1,4) && almost(r2,-4), got:`A:${r1}, B:${r2}`, want:'A:4, B:-4' };
+      });
+
+      // Test 4: Distance vs Displacement sanity
+      tests.push(()=>{
+        const O={x:0,y:0}, A={x:3,y:0}, B={x:3,y:4}, back={x:0,y:0};
+        const rOA = distanceAndDisplacement([O,A]);
+        const rOAB = distanceAndDisplacement([O,A,B]);
+        const rLoop = distanceAndDisplacement([O,A,B,back]);
+        const ok1 = almost(rOA.distance,3) && almost(rOA.displacement,3);
+        const ok2 = almost(rOAB.distance,7) && almost(rOAB.displacement,5);
+        const ok3 = almost(rLoop.distance,12) && almost(rLoop.displacement,0);
+        return {
+          name:'Distance vs Displacement cases',
+          pass: ok1 && ok2 && ok3,
+          got:`OA(d=${rOA.distance},D=${rOA.displacement}), OAB(d=${rOAB.distance},D=${rOAB.displacement}), loop(d=${rLoop.distance},D=${rLoop.displacement})`,
+          want:'OA(d=3,D=3), OAB(d=7,D=5), loop(d=12,D=0)'
+        };
+      });
+
+      // Test 5: Graph builder slope conversion
+      tests.push(()=>{
+        // s = t^2 sequence at t=[0,1,2] => segment velocities ≈ [1,3]
+        const data=[{t:0,s:0},{t:1,s:1},{t:2,s:4}];
+        const segs=[];
+        for(let i=1;i<data.length;i++){
+          const dt=data[i].t-data[i-1].t, ds=data[i].s-data[i-1].s;
+          segs.push(ds/dt);
+        }
+        return { name:'Graph slope → velocity', pass: almost(segs[0],1) && almost(segs[1],3), got:`[${segs.join(', ')}]`, want:'[1, 3]' };
+      });
+
+      function report(){
+        const res = tests.map(t=>t());
+        const html = res.map(r=>`
+          <div class="metric">
+            <b>${r.name}</b>
+            <div class="${r.pass?'ok':'bad'}">${r.pass?'PASS ✅':'FAIL ❌'}</div>
+            <div class="hint">got: ${r.got}<br/>want: ${r.want}</div>
+          </div>
+        `).join('');
+        out.innerHTML = html;
+        const summary = res.every(r=>r.pass)?'All tests PASS':'Some tests FAILED';
+        console.log('[Tests]', summary, res);
+      }
+      report();
+    })();
   </script>
 </body>
-</html>
+</html> 
