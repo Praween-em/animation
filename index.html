@@ -209,6 +209,48 @@
     const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
     const fmt = (n, d=2) => Number(n).toFixed(d);
 
+    // New helper function for drawing Cartesian axes, grid, and labels
+    function drawCartesianAxes(ctx, width, height, xLabel, yLabel, xMax, yMax, yMin = 0) {
+      ctx.strokeStyle = '#2b3150';
+      ctx.lineWidth = 1;
+      ctx.font = '12px system-ui';
+      ctx.fillStyle = '#aab1d6';
+
+      // Draw axes
+      ctx.beginPath();
+      ctx.moveTo(40, 10); // Y-axis start
+      ctx.lineTo(40, height - 30); // Y-axis end
+      ctx.lineTo(width - 10, height - 30); // X-axis end
+      ctx.stroke();
+
+      // Axis labels
+      ctx.fillText(xLabel, width - 50, height - 10);
+      ctx.fillText(yLabel, 10, 20);
+
+      // Grid and ticks for X-axis (Time)
+      const xTickInterval = xMax > 0 ? Math.max(1, Math.floor(xMax / 5)) : 1; // At least 1, max 5 ticks
+      for (let t = 0; t <= xMax; t += xTickInterval) {
+        const x = 40 + (t / xMax) * (width - 50);
+        ctx.beginPath();
+        ctx.moveTo(x, height - 30);
+        ctx.lineTo(x, 10); // Grid line
+        ctx.stroke();
+        ctx.fillText(t.toFixed(0), x - 5, height - 10);
+      }
+
+      // Grid and ticks for Y-axis (Velocity/Distance)
+      const yRange = yMax - yMin;
+      const yTickInterval = yRange > 0 ? Math.max(1, Math.floor(yRange / 5)) : 1; // At least 1, max 5 ticks
+      for (let v = yMin; v <= yMax; v += yTickInterval) {
+        const y = (height - 30) - ((v - yMin) / yRange) * (height - 40);
+        ctx.beginPath();
+        ctx.moveTo(40, y);
+        ctx.lineTo(width - 10, y); // Grid line
+        ctx.stroke();
+        ctx.fillText(v.toFixed(0), 10, y + 5);
+      }
+    }
+
     // ---------- Tabs ----------
     const tabBtns = $$('.tab-btn');
     const panels = ['tab1','tab2','tab3','tab4','tab5','tab6'].map(id => document.getElementById(id));
@@ -277,22 +319,38 @@
 
         // update velocities based on frame
         const frame = frameSel.value;
+        const EPSILON = 1e-9; // Define a small epsilon for near-zero checks
+
         if(frame==='ground'){
-          busA.x += busA.v*dt*8;
-          busB.x += busB.v*dt*8;
+          const dxA = (Math.abs(busA.v) < EPSILON ? 0 : busA.v) * dt * 8;
+          busA.x += dxA;
+          if (dxA !== 0) { // Only wrap if it actually moved
+            busA.x = (busA.x + c.width + 40)%(c.width+80);
+          }
+
+          const dxB = (Math.abs(busB.v) < EPSILON ? 0 : busB.v) * dt * 8;
+          busB.x += dxB;
+          if (dxB !== 0) { // Only wrap if it actually moved
+            busB.x = (busB.x + c.width + 40)%(c.width+80);
+          }
         }else if(frame==='A'){
           const vrel = busB.v - busA.v;
-          busB.x += vrel*dt*8;
+          const dxB = (Math.abs(vrel) < EPSILON ? 0 : vrel) * dt * 8;
+          busB.x += dxB;
+          if (dxB !== 0) { // Only wrap if it actually moved
+            busB.x = (busB.x + c.width + 40)%(c.width+80);
+          }
           // A stays centered
           busA.x = c.width/2;
-        }else{
+        }else{ // frame === 'B'
           const vrel = busA.v - busB.v;
-          busA.x += vrel*dt*8;
+          const dxA = (Math.abs(vrel) < EPSILON ? 0 : vrel) * dt * 8;
+          busA.x += dxA;
+          if (dxA !== 0) { // Only wrap if it actually moved
+            busA.x = (busA.x + c.width + 40)%(c.width+80);
+          }
           busB.x = c.width/2;
         }
-        // wrap around
-        busA.x = (busA.x + c.width + 40)%(c.width+80);
-        busB.x = (busB.x + c.width + 40)%(c.width+80);
         draw();
         requestAnimationFrame(tick);
       }
@@ -313,8 +371,17 @@
         metrics.innerHTML = html;
       }
       function metric(name,val){ return `<div class="metric"><b>${name}</b><div>${val}</div></div>`; }
-      va.addEventListener('input',()=>{ busA.v=Number(va.value); updateUI(); });
-      vb.addEventListener('input',()=>{ busB.v=Number(vb.value); updateUI(); });
+      const EPSILON_INPUT = 1e-6; // A slightly larger epsilon for input values
+      va.addEventListener('input',()=>{
+        const val = Number(va.value);
+        busA.v = Math.abs(val) < EPSILON_INPUT ? 0 : val;
+        updateUI();
+      });
+      vb.addEventListener('input',()=>{
+        const val = Number(vb.value);
+        busB.v = Math.abs(val) < EPSILON_INPUT ? 0 : val;
+        updateUI();
+      });
       frameSel.addEventListener('change', updateUI);
       start.onclick=()=>{ running=true; t0=0; requestAnimationFrame(tick); }
       pause.onclick=()=>{ running=false; }
@@ -396,16 +463,20 @@
         g.fillStyle='#7aa2ff'; g.beginPath(); g.arc(x,280,10,0,Math.PI*2); g.fill();
         // info
       }
-      function drawVT(){
+            function drawVT(){
         gv.clearRect(0,0,vt.width,vt.height);
-        // axes
-        gv.strokeStyle='#2b3150'; gv.lineWidth=1;
-        gv.beginPath(); gv.moveTo(30,10); gv.lineTo(30,vt.height-20); gv.lineTo(vt.width-10,vt.height-20); gv.stroke();
-        // line v(t) = u + a t
+
         const maxT = Math.max(5, T);
         const maxV = Math.max(Math.abs(u), Math.abs(u+a*T)) + 2;
-        const X=t=> 30 + (t/maxT)*(vt.width-40);
-        const Y=v=> (vt.height-20) - ((v+maxV)/(2*maxV))*(vt.height-30);
+        const minV = Math.min(0, u, u+a*T) - 2; // For negative velocities
+
+        // Draw Cartesian axes, grid, and labels
+        drawCartesianAxes(gv, vt.width, vt.height, 'Time (s)', 'Velocity (m/s)', maxT, maxV, minV);
+
+        const X=t=> 40 + (t/maxT)*(vt.width-50); // Adjusted for new axis origin
+        const Y=v=> (vt.height-30) - ((v-minV)/(maxV-minV))*(vt.height-40); // Adjusted for new axis origin and range
+
+        // line v(t) = u + a t
         gv.strokeStyle='#7aa2ff'; gv.lineWidth=2; gv.beginPath(); gv.moveTo(X(0),Y(u)); gv.lineTo(X(T),Y(u+a*T)); gv.stroke();
         // shade area (displacement)
         gv.fillStyle='rgba(122,162,255,0.2)'; gv.beginPath();
@@ -469,11 +540,13 @@
       };
       function drawDS(data){
         g1.clearRect(0,0,ds.width,ds.height);
-        axes(g1, ds.width, ds.height, 's');
         const maxT = Math.max(...data.map(d=>d.t));
         const maxS = Math.max(...data.map(d=>d.s));
-        const X=t=> 40 + (t/maxT)*(ds.width-60);
-        const Y=s=> (ds.height-30) - (s/maxS)*(ds.height-50);
+        axes(g1, ds.width, ds.height, 'Distance (m)', maxT, maxS); // Updated call
+
+        const X=t=> 40 + (t/maxT)*(ds.width-50); // Adjusted for new axis origin
+        const Y=s=> (ds.height-30) - (s/maxS)*(ds.height-40); // Adjusted for new axis origin
+
         // polyline
         g1.strokeStyle='#7aa2ff'; g1.lineWidth=2; g1.beginPath();
         g1.moveTo(X(data[0].t), Y(data[0].s));
@@ -482,7 +555,6 @@
       }
       function drawVT(data){
         g2.clearRect(0,0,vt.width,vt.height);
-        axes(g2, vt.width, vt.height, 'v');
         // piecewise velocity (slope)
         const segs=[];
         for(let i=1;i<data.length;i++){
@@ -494,8 +566,13 @@
         if(segs.length===0) return;
         const maxT = Math.max(...data.map(d=>d.t));
         const maxV = Math.max(...segs.map(s=>Math.abs(s.v))) || 1;
-        const X=t=> 40 + (t/maxT)*(vt.width-60);
-        const Y=v=> (vt.height-30) - ((v+maxV)/(2*maxV))*(vt.height-50);
+        const minV = Math.min(0, ...segs.map(s=>s.v)); // For negative velocities
+
+        axes(g2, vt.width, vt.height, 'Velocity (m/s)', maxT, maxV, minV); // Updated call
+
+        const X=t=> 40 + (t/maxT)*(vt.width-50); // Adjusted for new axis origin
+        const Y=v=> (vt.height-30) - ((v-minV)/(maxV-minV))*(vt.height-40); // Adjusted for new axis origin and range
+
         // draw steps
         g2.strokeStyle='#47d18c'; g2.lineWidth=2; g2.beginPath();
         g2.moveTo(X(segs[0].t0), Y(segs[0].v));
@@ -507,10 +584,9 @@
           <div class="metric"><b>Segment ${i+1} [${s.t0}→${s.t1}]</b><div>v ≈ ${fmt(s.v)} m/s</div></div>
         `).join('');
       }
-      function axes(ctx,w,h,label){
-        ctx.strokeStyle='#2b3150'; ctx.lineWidth=1;
-        ctx.beginPath(); ctx.moveTo(30,10); ctx.lineTo(30,h-20); ctx.lineTo(w-10,h-20); ctx.stroke();
-        ctx.fillStyle='#aab1d6'; ctx.font='12px system-ui'; ctx.fillText('t', w-24, h-26); ctx.fillText(label, 18, 18);
+      // Modified axes function for Tab 4
+      function axes(ctx, w, h, yAxisLabel, xMax, yMax, yMin = 0){
+        drawCartesianAxes(ctx, w, h, 'Time (s)', yAxisLabel, xMax, yMax, yMin);
       }
     })();
 
