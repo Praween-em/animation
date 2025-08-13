@@ -1,459 +1,125 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>States of Matter — Responsive Mobile-first</title>
-<!-- anime.js CDN -->
-<script src="https://unpkg.com/animejs@3.2.1/lib/anime.min.js"></script>
-<style>
-  /* ========== Mobile-first responsive styles ========== */
-  :root{
-    --bg: #0e1726;
-    --accent1: #4cc9f0;
-    --accent2: #4895ef;
-    --card: rgba(255,255,255,0.05);
-    --muted: rgba(255,255,255,0.85);
-  }
-  * { box-sizing: border-box; }
-  html,body { height:100%; margin:0; }
-  body {
-    min-height:100vh;
-    background: var(--bg);
-    color: #fff;
-    font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:12px;
-    padding:12px;
-  }
-
-  /* MAIN HEADING (big, animating) */
-  #mainHeading {
-    width:100%;
-    max-width:880px;
-    height:44px;                 /* fixed height to allow smooth vertical slide */
-    margin:0;
-    overflow:hidden;
-    text-align:center;
-    font-weight:700;
-    font-size:clamp(18px,5.5vw,34px);
-    line-height:44px;
-  }
-  .heading-wrapper { position:relative; height:100%; }
-  .heading-item {
-    position:absolute; left:0; right:0; top:0;
-    width:100%; text-align:center; pointer-events:none;
-  }
-
-  /* SMALL LABEL under heading */
-  .state-label {
-    width:100%;
-    max-width:880px;
-    height:30px;
-    overflow:hidden;
-    font-size:clamp(13px,4vw,18px);
-    text-align:center;
-    color:#dbeafe;
-    font-weight:600;
-  }
-  .label-wrapper { position:relative; height:100%; }
-  .label-item { position:absolute; left:0; right:0; top:0; width:100%; text-align:center; }
-
-  /* PARTICLE CONTAINER */
-  .container {
-    width: min(94vw, 520px);
-    height: min(56vh, 360px);
-    max-height: 72vh;
-    border-radius:12px;
-    border: 3px solid rgba(255,255,255,0.10);
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    position:relative;
-    overflow:hidden;
-    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
-  }
-  .particle {
-    width: clamp(10px, 3.2vw, 14px);
-    height: clamp(10px, 3.2vw, 14px);
-    border-radius:50%;
-    position:absolute;
-    background: radial-gradient(circle at 30% 30%, #fff, var(--accent1));
-    box-shadow: 0 6px 12px rgba(0,0,0,0.45);
-    will-change: transform, left, top;
-  }
-
-  /* Controls */
-  .controls {
-    display:flex; gap:10px; align-items:center; justify-content:center; width:100%; max-width:880px;
-  }
-  #changeStateBtn {
-    background: linear-gradient(90deg,var(--accent1),var(--accent2));
-    border: none;
-    color: #07203a;
-    font-weight:800;
-    padding: 10px 16px;
-    border-radius:10px;
-    font-size: clamp(14px, 3.8vw, 16px);
-    cursor:pointer;
-    box-shadow: 0 8px 30px rgba(74,123,180,0.12);
-    touch-action: manipulation;
-  }
-  #changeStateBtn:active { transform: translateY(1px); }
-
-  /* Description box */
-  .description {
-    width:100%;
-    max-width:880px;
-    background: var(--card);
-    border-radius:12px;
-    padding: clamp(10px, 3.5vw, 16px);
-    box-sizing:border-box;
-    font-size: clamp(13px, 3vw, 17px);
-    line-height:1.45;
-    word-wrap: break-word;
-    min-height: clamp(86px, 16vh, 140px); /* flexible */
-  }
-  .desc-wrapper { position:relative; overflow:hidden; min-height:80px; }
-  .desc-item { position:absolute; left:0; right:0; top:0; width:100%; }
-  ul { margin:0; padding-left:1.05rem; color:#e6f6ff; }
-  li { margin-bottom:0.55rem; }
-
-  /* Larger screens adjustments */
-  @media (min-width:720px){
-    body { padding:22px; gap:16px; }
-    #mainHeading { height:56px; line-height:56px; font-size:clamp(22px,3.5vw,36px); }
-    .state-label { height:34px; font-size:18px; }
-    .container { width: min(82vw, 640px); height: min(56vh, 420px); }
-  }
-</style>
+  <meta charset="utf-8" />
+  <title>Reference Point & Motion — Interactive Learning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f6f7fb;color:#131522;line-height:1.5}
+    header{background:#1f2937;color:#fff;padding:14px 18px}
+    h1{margin:0;font-size:20px}
+    .wrap{max-width:920px;margin:16px auto;padding:0 12px}
+    canvas{display:block;width:100%;max-width:900px;height:320px;background:#cce6ff;border:2px solid #1f2937;border-radius:10px;margin:12px 0}
+    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .cell{flex:1;min-width:240px}
+    label{display:inline-block;min-width:150px}
+    input[type=range]{width:220px}
+    .note{font-size:13px;color:#6b7280;margin-top:4px}
+    .metric{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin-top:8px}
+    code{background:#eef2ff;padding:0 4px;border-radius:4px}
+    ul{padding-left:20px}
+  </style>
 </head>
 <body>
-
-  <!-- MAIN HEADING (wrapper + initial item) -->
-  <h1 id="mainHeading" aria-live="polite">
-    <div class="heading-wrapper" id="headingWrapper">
-      <div class="heading-item">Solid State of Matter</div>
+  <header><h1>Reference Point & Motion — Interactive Learning</h1></header>
+  <div class="wrap">
+    
+    <div class="panel">
+      <h2>Concept Overview</h2>
+      <p><b>Motion</b> is the change in position of an object with respect to a <b>reference point</b> over time.</p>
+      <p>A <b>reference point</b> is a fixed position we use to determine whether an object has changed its position. Without a reference point, it is impossible to say if motion has occurred.</p>
     </div>
-  </h1>
 
-  <!-- SMALL STATE LABEL -->
-  <div class="state-label" aria-hidden="false">
-    <div class="label-wrapper" id="labelWrapper">
-      <div class="label-item">Solid</div>
+    <div class="panel">
+      <h2>Definitions</h2>
+      <ul>
+        <li><b>Reference Point</b>: A stationary object or position used as a basis to measure motion.</li>
+        <li><b>Relative Motion</b>: Motion described in relation to a chosen reference point.</li>
+        <li><b>Relative Velocity</b>: The velocity of one object as seen from another moving object, given by <code>v<sub>B|A</sub> = v<sub>B</sub> − v<sub>A</sub></code>.</li>
+      </ul>
     </div>
-  </div>
 
-  <!-- PARTICLE STAGE -->
-  <div class="container" id="container" role="img" aria-label="Particles in container representing state of matter"></div>
+    <div class="panel">
+      <h2>Real-Life Examples</h2>
+      <ul>
+        <li><b>Inside a moving train</b>: Trees outside appear to move backwards; another train moving alongside may appear stationary if speeds match.</li>
+        <li><b>In an airplane</b>: Passengers appear stationary to each other, but to someone on the ground, everyone is moving at the plane's speed.</li>
+        <li><b>Walking on a moving walkway</b> at an airport: Your speed relative to the ground is the sum of your walking speed and the walkway's speed.</li>
+      </ul>
+    </div>
 
-  <!-- CONTROLS -->
-  <div class="controls">
-    <button id="changeStateBtn" aria-controls="container description headingWrapper labelWrapper">Change to Liquid</button>
-  </div>
+    <div class="panel">
+      <h2>Try It Yourself</h2>
+      <p>Adjust the sliders below to change the speed of each entity and see how motion is perceived differently from each reference point.</p>
+    </div>
 
-  <!-- DESCRIPTION -->
-  <div class="description" aria-live="polite">
-    <div class="desc-wrapper" id="descWrapper">
-      <div class="desc-item">
-        <ul>
-          <li>Particles are closely packed and fixed in position.</li>
-          <li>Definite shape and definite volume.</li>
-          <li>Particles vibrate but do not move freely.</li>
-          <li>Strong intermolecular forces.</li>
-        </ul>
+    <canvas id="canvas" width="900" height="320" aria-label="Simulation canvas"></canvas>
+
+    <div class="panel">
+      <div class="row">
+        <div class="cell">
+          <h3>Controls</h3>
+          <div><label>Observer A speed</label>
+            <input type="range" id="obsASpeed" min="-5" max="5" step="0.1" value="0">
+            <span id="obsASpeedValue">0</span> m/s
+          </div>
+          <div><label>Observer B speed</label>
+            <input type="range" id="obsBSpeed" min="-5" max="5" step="0.1" value="0">
+            <span id="obsBSpeedValue">0</span> m/s
+          </div>
+          <div><label>Object speed</label>
+            <input type="range" id="objSpeed" min="-5" max="5" step="0.1" value="2">
+            <span id="objSpeedValue">2</span> m/s
+          </div>
+        </div>
+        <div class="cell">
+          <h3>Quick Metrics</h3>
+          <div class="metric" id="mA"></div>
+          <div class="metric" id="mB"></div>
+        </div>
       </div>
+      <p class="note">This is pure web mode — no manifest file needed.</p>
     </div>
+
   </div>
 
-<script>
-/* ===================== Settings & Data ===================== */
-const STATES = ['Solid','Liquid','Gas'];
-const STATE_INFO = {
-  Solid: [
-    "Particles are closely packed and fixed in position.",
-    "Definite shape and definite volume.",
-    "Particles vibrate but do not move freely.",
-    "Strong intermolecular forces."
-  ],
-  Liquid: [
-    "Particles are close but can slide past each other.",
-    "No definite shape, but definite volume.",
-    "Flows to take the shape of its container.",
-    "Moderate intermolecular forces."
-  ],
-  Gas: [
-    "Particles are far apart and move freely.",
-    "No definite shape or volume.",
-    "Fills the entire container.",
-    "Very weak intermolecular forces."
-  ]
-};
+  <script>
+    const C = document.getElementById('canvas'), ctx = C.getContext('2d');
+    const obsA = { x:120, y:200, v:0, color:'#2563eb', label:'Observer A' };
+    const obsB = { x:360, y:200, v:0, color:'#10b981', label:'Observer B' };
+    const obj  = { x:720, y:200, v:2, color:'#ef4444', label:'Object' };
 
-/* responsive particle count heuristic (keeps mobile tidy) */
-function calcParticleCount(containerWidth) {
-  // mobile narrow: fewer particles, medium and large: more
-  if (containerWidth < 340) return 18;
-  if (containerWidth < 420) return 24;
-  if (containerWidth < 520) return 30;
-  return 36; // desktop
-}
+    const aIn = document.getElementById('obsASpeed'), aVal = document.getElementById('obsASpeedValue');
+    const bIn = document.getElementById('obsBSpeed'), bVal = document.getElementById('obsBSpeedValue');
+    const oIn = document.getElementById('objSpeed'),  oVal = document.getElementById('objSpeedValue');
+    const mA  = document.getElementById('mA'), mB = document.getElementById('mB');
 
-/* ========== DOM refs ========== */
-const headingWrapper = document.getElementById('headingWrapper');
-const labelWrapper = document.getElementById('labelWrapper');
-const descWrapper = document.getElementById('descWrapper');
-const container = document.getElementById('container');
-const btn = document.getElementById('changeStateBtn');
+    const fmt = (x)=>Number(x).toFixed(2);
+    aIn.oninput=()=>{ obsA.v=parseFloat(aIn.value); aVal.textContent=fmt(obsA.v); };
+    bIn.oninput=()=>{ obsB.v=parseFloat(bIn.value); bVal.textContent=fmt(obsB.v); };
+    oIn.oninput=()=>{ obj.v =parseFloat(oIn.value);  oVal.textContent=fmt(obj.v); };
 
-let currentStateIndex = 0;
-let particles = [];            // DOM nodes
-let currentParticleCount = 0;
-
-/* ========== Utility: robust swap with slide & crossfade ========== */
-function swapTextWithSlide(wrapperEl, newHTML, opts = {}) {
-  const outDur = opts.outDur ?? 300;
-  const inDur  = opts.inDur  ?? 340;
-  const easing = opts.easing ?? 'easeInOutQuad';
-
-  // Determine class for new item
-  const cls = wrapperEl === descWrapper ? 'desc-item' : (wrapperEl === headingWrapper ? 'heading-item' : 'label-item');
-
-  // create new node (start below, invisible)
-  const newItem = document.createElement('div');
-  newItem.className = cls;
-  newItem.style.transform = 'translateY(28px)';
-  newItem.style.opacity = '0';
-  newItem.innerHTML = newHTML;
-  wrapperEl.appendChild(newItem);
-
-  // old items (everything except newly appended)
-  const oldItems = Array.from(wrapperEl.children).filter(c => c !== newItem);
-
-  // timeline: old items up & fade; new item in from below
-  const tl = anime.timeline({ autoplay:true });
-
-  if (oldItems.length) {
-    tl.add({
-      targets: oldItems,
-      translateY: -28,
-      opacity: 0,
-      duration: outDur,
-      easing,
-      delay: anime.stagger(30)
-    });
-  }
-  tl.add({
-    targets: newItem,
-    translateY: [28,0],
-    opacity: [0,1],
-    duration: inDur,
-    easing,
-    offset: `-=${Math.min(outDur, inDur)}`
-  });
-
-  tl.finished.then(() => {
-    // cleanup old nodes
-    oldItems.forEach(n => n.remove());
-  }).catch(()=>{/*ignore*/});
-}
-
-/* ================= Particle lifecycle ================= */
-
-/* create particle nodes based on currentParticleCount */
-function createParticles() {
-  // clear existing
-  container.innerHTML = '';
-  particles = [];
-  for (let i=0;i<currentParticleCount;i++){
-    const p = document.createElement('div');
-    p.className = 'particle';
-    // initial placement in center
-    p.style.left = '50%';
-    p.style.top  = '50%';
-    container.appendChild(p);
-    particles.push(p);
-  }
-}
-
-/* stop all anime animations on particles */
-function stopParticleAnimations(){
-  anime.remove(particles);
-}
-
-/* arrange Solid: grid with tiny vibration (no drift) */
-function arrangeSolid(){
-  const W = container.clientWidth, H = container.clientHeight;
-  const cols = Math.min(6, Math.ceil(Math.sqrt(currentParticleCount)));
-  const rows = Math.ceil(currentParticleCount / cols);
-  const spacingX = W / (cols + 1);
-  const spacingY = H / (rows + 1);
-
-  particles.forEach((p,i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    const targetX = Math.round(spacingX * (col + 1));
-    const targetY = Math.round(spacingY * (row + 1));
-    anime({
-      targets: p,
-      left: `${targetX}px`,
-      top:  `${targetY}px`,
-      translateX: 0, translateY: 0,
-      duration: 600,
-      easing: 'easeInOutQuad',
-      complete: () => {
-        anime({
-          targets: p,
-          translateX: [
-            { value: -2, duration: 300 },
-            { value: 2, duration: 300 },
-            { value: 0, duration: 300 }
-          ],
-          translateY: [
-            { value: -2, duration: 320 },
-            { value: 2, duration: 320 },
-            { value: 0, duration: 320 }
-          ],
-          easing: 'easeInOutSine',
-          loop: true
-        });
-      }
-    });
-  });
-}
-
-/* liquid: random but close positions + gentle float */
-function floatAround(el, range=22, dur=1800) {
-  anime({
-    targets: el,
-    translateX: (Math.random()-0.5)*range,
-    translateY: (Math.random()-0.5)*range,
-    duration: dur + Math.random()*900,
-    direction: 'alternate',
-    easing: 'easeInOutSine',
-    loop: true
-  });
-}
-function arrangeLiquid(){
-  const W = container.clientWidth, H = container.clientHeight;
-  particles.forEach(p => {
-    anime({
-      targets: p,
-      left: `${Math.random() * Math.max(1, (W - p.clientWidth))}px`,
-      top:  `${Math.random() * Math.max(1, (H - p.clientHeight))}px`,
-      translateX: 0, translateY: 0,
-      duration: 700 + Math.random()*300,
-      easing: 'easeInOutQuad',
-      complete: () => floatAround(p, 28, 1700 + Math.random()*1200)
-    });
-  });
-}
-
-/* gas: free linear motion, continuous */
-function moveRandomly(el, W, H){
-  anime({
-    targets: el,
-    left: `${Math.random() * Math.max(1, (W - el.clientWidth))}px`,
-    top:  `${Math.random() * Math.max(1, (H - el.clientHeight))}px`,
-    duration: 1100 + Math.random()*2600,
-    easing: 'linear',
-    complete: () => {
-      // continue moving only if node still exists (prevents errors on removal)
-      if (document.body.contains(el)) moveRandomly(el, W, H);
+    function drawDot(e){
+      ctx.beginPath(); ctx.arc(e.x,e.y,14,0,Math.PI*2);
+      ctx.fillStyle=e.color; ctx.fill(); ctx.strokeStyle='#111827'; ctx.stroke();
+      ctx.fillStyle='#111827'; ctx.font='12px system-ui'; ctx.fillText(e.label, e.x-36, e.y-20);
     }
-  });
-}
-function arrangeGas(){
-  const W = container.clientWidth, H = container.clientHeight;
-  particles.forEach(p => {
-    anime({
-      targets: p,
-      left: `${Math.random() * Math.max(1, (W - p.clientWidth))}px`,
-      top:  `${Math.random() * Math.max(1, (H - p.clientHeight))}px`,
-      duration: 400 + Math.random()*600,
-      easing: 'easeOutQuad',
-      complete: () => moveRandomly(p, W, H)
-    });
-  });
-}
-
-/* ========== Primary state setter (syncs text + particles) ========== */
-function setState(stateName) {
-  // stop running particle loops
-  stopParticleAnimations();
-
-  // visual swaps (heading, small label, description)
-  swapTextWithSlide(headingWrapper, `${stateName} State of Matter`, { outDur:300, inDur:360 });
-  swapTextWithSlide(labelWrapper, stateName, { outDur:260, inDur:320 });
-  const descHtml = `<ul>${STATE_INFO[stateName].map(s => `<li>${s}</li>`).join('')}</ul>`;
-  swapTextWithSlide(descWrapper, descHtml, { outDur:260, inDur:320 });
-
-  // arrange particles slightly after text begins to move for nicer feel
-  setTimeout(() => {
-    if (stateName === 'Solid') arrangeSolid();
-    else if (stateName === 'Liquid') arrangeLiquid();
-    else arrangeGas();
-  }, 120);
-}
-
-/* ========== Initialization & Resize handling ========== */
-function init() {
-  // determine particle count based on container width
-  const cw = container.clientWidth;
-  const desired = calcParticleCount(cw);
-
-  currentParticleCount = desired;
-  createParticles();
-  // initial state
-  setState('Solid');
-  btn.textContent = `Change to ${STATES[1]}`;
-}
-
-/* createParticles uses currentParticleCount */
-function createParticles(){
-  container.innerHTML = '';
-  particles = [];
-  for (let i=0;i<currentParticleCount;i++){
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = '50%';
-    p.style.top = '50%';
-    container.appendChild(p);
-    particles.push(p);
-  }
-}
-
-/* Debounced resize: if particle count should change, recreate, else re-arrange */
-let resizeTimer = null;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    const cw = container.clientWidth;
-    const desired = calcParticleCount(cw);
-    if (desired !== currentParticleCount) {
-      // recreate with new count
-      currentParticleCount = desired;
-      createParticles();
+    function update(e){
+      e.x += e.v; if(e.x > C.width+16) e.x = -16; if(e.x < -16) e.x = C.width+16;
     }
-    // re-apply current arrangement
-    const state = STATES[currentStateIndex];
-    setState(state);
-  }, 160);
-});
-
-/* button click cycling */
-btn.addEventListener('click', () => {
-  currentStateIndex = (currentStateIndex + 1) % STATES.length;
-  const next = STATES[currentStateIndex];
-  setState(next);
-  btn.textContent = `Change to ${STATES[(currentStateIndex + 1) % STATES.length]}`;
-});
-
-/* init on DOM ready */
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else init();
-
-</script>
+    function animate(){
+      ctx.clearRect(0,0,C.width,C.height);
+      ctx.strokeStyle='#9ca3af'; ctx.setLineDash([8,8]);
+      ctx.beginPath(); ctx.moveTo(20,240); ctx.lineTo(C.width-20,240); ctx.stroke(); ctx.setLineDash([]);
+      [obsA, obsB, obj].forEach(update);
+      [obsA, obsB, obj].forEach(drawDot);
+      const vBA = obj.v - obsA.v, vBB = obj.v - obsB.v;
+      mA.innerHTML = `<b>Relative to A</b><div>${fmt(vBA)} m/s</div>`;
+      mB.innerHTML = `<b>Relative to B</b><div>${fmt(vBB)} m/s</div>`;
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
 </body>
 </html>
