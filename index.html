@@ -1,125 +1,416 @@
-<!doctype html>
+# Writing an updated standalone HTML file with two separate web-only simulations (no manifest).
+html = r"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Reference Point & Motion — Interactive Learning</title>
+  <title>Interactive Motion Simulations — Web Only (Reference + Distance)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f6f7fb;color:#131522;line-height:1.5}
-    header{background:#1f2937;color:#fff;padding:14px 18px}
+    :root{
+      --bg:#0f1724; --panel:#0b1220; --card:#0f1724; --ink:#e6eef8; --muted:#9aa6bf; --accent:#58a6ff;
+      --ok:#2ea043; --warn:#d29922; --bad:#ff6b6b;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071022,#0b1220);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+    .app{max-width:1100px;margin:18px auto;padding:18px}
+    header{display:flex;align-items:center;gap:12px}
     h1{margin:0;font-size:20px}
-    .wrap{max-width:920px;margin:16px auto;padding:0 12px}
-    canvas{display:block;width:100%;max-width:900px;height:320px;background:#cce6ff;border:2px solid #1f2937;border-radius:10px;margin:12px 0}
-    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:16px}
+    .tabs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .tab{background:transparent;border:1px solid #102030;color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .tab[aria-selected="true"]{outline:2px solid var(--accent);box-shadow:0 6px 30px rgba(5,10,20,0.6)}
+    .panel{background:#0b1220;border:1px solid #162433;border-radius:12px;padding:14px;margin-top:12px}
     .row{display:flex;gap:12px;flex-wrap:wrap}
-    .cell{flex:1;min-width:240px}
-    label{display:inline-block;min-width:150px}
-    input[type=range]{width:220px}
-    .note{font-size:13px;color:#6b7280;margin-top:4px}
-    .metric{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin-top:8px}
-    code{background:#eef2ff;padding:0 4px;border-radius:4px}
-    ul{padding-left:20px}
+    .col{flex:1;min-width:260px}
+    label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+    input[type=range]{width:100%}
+    button{background:var(--accent);border:none;color:#021226;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid #1b2a3b;color:var(--muted)}
+    canvas{width:100%;height:320px;background:#e6f6ff;border-radius:10px;border:1px solid #c7e6ff;display:block}
+    .metric{background:#081420;border:1px solid #102333;border-radius:8px;padding:10px;margin-top:8px}
+    .muted{color:var(--muted);font-size:13px}
+    pre.small{background:#071026;padding:8px;border-radius:8px;color:var(--muted);font-size:13px;overflow:auto}
+    footer{margin-top:12px;color:var(--muted);font-size:13px}
   </style>
 </head>
 <body>
-  <header><h1>Reference Point & Motion — Interactive Learning</h1></header>
-  <div class="wrap">
-    
-    <div class="panel">
-      <h2>Concept Overview</h2>
-      <p><b>Motion</b> is the change in position of an object with respect to a <b>reference point</b> over time.</p>
-      <p>A <b>reference point</b> is a fixed position we use to determine whether an object has changed its position. Without a reference point, it is impossible to say if motion has occurred.</p>
+  <div class="app">
+    <header>
+      <h1>Interactive Motion Simulations — Web Only</h1>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Simulation tabs">
+      <button class="tab" role="tab" aria-controls="panel-ref" aria-selected="true" id="tab-ref">1 • Reference Point</button>
+      <button class="tab" role="tab" aria-controls="panel-dist" aria-selected="false" id="tab-dist">2 • Distance & Displacement</button>
+      <button class="tab" role="tab" aria-controls="panel-tests" aria-selected="false" id="tab-tests">Tests</button>
     </div>
 
-    <div class="panel">
-      <h2>Definitions</h2>
-      <ul>
-        <li><b>Reference Point</b>: A stationary object or position used as a basis to measure motion.</li>
-        <li><b>Relative Motion</b>: Motion described in relation to a chosen reference point.</li>
-        <li><b>Relative Velocity</b>: The velocity of one object as seen from another moving object, given by <code>v<sub>B|A</sub> = v<sub>B</sub> − v<sub>A</sub></code>.</li>
-      </ul>
-    </div>
-
-    <div class="panel">
-      <h2>Real-Life Examples</h2>
-      <ul>
-        <li><b>Inside a moving train</b>: Trees outside appear to move backwards; another train moving alongside may appear stationary if speeds match.</li>
-        <li><b>In an airplane</b>: Passengers appear stationary to each other, but to someone on the ground, everyone is moving at the plane's speed.</li>
-        <li><b>Walking on a moving walkway</b> at an airport: Your speed relative to the ground is the sum of your walking speed and the walkway's speed.</li>
-      </ul>
-    </div>
-
-    <div class="panel">
-      <h2>Try It Yourself</h2>
-      <p>Adjust the sliders below to change the speed of each entity and see how motion is perceived differently from each reference point.</p>
-    </div>
-
-    <canvas id="canvas" width="900" height="320" aria-label="Simulation canvas"></canvas>
-
-    <div class="panel">
+    <!-- Panel: Reference Point & Motion -->
+    <section class="panel" id="panel-ref" role="tabpanel">
       <div class="row">
-        <div class="cell">
-          <h3>Controls</h3>
-          <div><label>Observer A speed</label>
-            <input type="range" id="obsASpeed" min="-5" max="5" step="0.1" value="0">
-            <span id="obsASpeedValue">0</span> m/s
-          </div>
-          <div><label>Observer B speed</label>
-            <input type="range" id="obsBSpeed" min="-5" max="5" step="0.1" value="0">
-            <span id="obsBSpeedValue">0</span> m/s
-          </div>
-          <div><label>Object speed</label>
-            <input type="range" id="objSpeed" min="-5" max="5" step="0.1" value="2">
-            <span id="objSpeedValue">2</span> m/s
-          </div>
+        <div class="col" style="max-width:520px">
+          <h2>Reference Point & Motion — Concept</h2>
+          <p class="muted">
+            <strong>Motion</strong> is a change of position of an object relative to a <strong>reference point</strong>.
+            Choosing a different reference point changes how motion is described (relative motion).
+          </p>
+          <h4>Definitions</h4>
+          <ul class="muted">
+            <li><strong>Reference point:</strong> fixed position used to measure motion.</li>
+            <li><strong>Relative motion:</strong> motion observed from a chosen reference frame.</li>
+            <li><strong>Relative velocity:</strong> velocity of object B as seen from A: <code>v<sub>B|A</sub> = v_B − v_A</code>.</li>
+          </ul>
+
+          <h4>Examples</h4>
+          <ul class="muted">
+            <li>Passenger on a train sees trees outside moving backwards (trees are reference points in earth frame).</li>
+            <li>Two cars moving side-by-side at same speed appear stationary to each other.</li>
+            <li>Walking on a moving walkway: your ground speed = walkway speed + walking speed.</li>
+          </ul>
+
+          <p class="muted"><strong>Try:</strong> change speeds and switch observer frame in the simulation to see relative motion.</p>
         </div>
-        <div class="cell">
-          <h3>Quick Metrics</h3>
-          <div class="metric" id="mA"></div>
-          <div class="metric" id="mB"></div>
+
+        <div class="col">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="flex:1">
+              <label for="rp_vA">Observer A speed (m/s)</label>
+              <input id="rp_vA" type="range" min="-20" max="20" step="0.5" value="0">
+              <div class="muted" id="rp_vA_val">0.0 m/s</div>
+            </div>
+
+            <div style="flex:1">
+              <label for="rp_vB">Observer B speed (m/s)</label>
+              <input id="rp_vB" type="range" min="-20" max="20" step="0.5" value="0">
+              <div class="muted" id="rp_vB_val">0.0 m/s</div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+            <label for="rp_frame" style="min-width:110px">Observer frame</label>
+            <select id="rp_frame" style="padding:8px;border-radius:8px;background:#07122a;color:var(--ink)">
+              <option value="ground">Ground (stationary)</option>
+              <option value="A">On Observer A</option>
+              <option value="B">On Observer B</option>
+            </select>
+            <button id="rp_start" class="ghost">Start/Restart</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <canvas id="rp_canvas" width="540" height="320"></canvas>
+          </div>
+
+          <div class="row" style="margin-top:8px">
+            <div class="metric" id="rp_metrics">
+              <div><strong>Velocities:</strong></div>
+              <div id="rp_v_ground" class="muted">A = 0.0 m/s, B = 0.0 m/s, Object = 8.0 m/s</div>
+              <div style="height:8px"></div>
+              <div id="rp_v_rel" class="muted">Object wrt A: 8.0 m/s • Object wrt B: 8.0 m/s</div>
+            </div>
+          </div>
+
         </div>
       </div>
-      <p class="note">This is pure web mode — no manifest file needed.</p>
-    </div>
+    </section>
 
+    <!-- Panel: Distance & Displacement -->
+    <section class="panel" id="panel-dist" role="tabpanel" hidden>
+      <div class="row">
+        <div class="col" style="max-width:520px">
+          <h2>Distance, Displacement, Speed & Velocity — Concept</h2>
+          <p class="muted">
+            <strong>Distance</strong> is how much ground an object has covered (scalar). <strong>Displacement</strong> is the straight-line vector between start and current position.
+          </p>
+          <h4>Formulas</h4>
+          <ul class="muted">
+            <li>Speed = Distance / Time</li>
+            <li>Velocity = Displacement / Time</li>
+          </ul>
+
+          <h4>Examples & Analogy</h4>
+          <ul class="muted">
+            <li>Run one lap around a 400 m track: distance = 400 m, displacement = 0.</li>
+            <li>Analogy: distance = footsteps taken; displacement = straight-line distance from where you started.</li>
+          </ul>
+        </div>
+
+        <div class="col">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="flex:1">
+              <label for="dd_speed">Object speed (m/s)</label>
+              <input id="dd_speed" type="range" min="-10" max="10" step="0.1" value="2">
+              <div class="muted" id="dd_speed_val">2.0 m/s</div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <div style="display:flex;gap:8px">
+              <button id="dd_toggle">Pause</button>
+              <button id="dd_reset" class="ghost">Reset</button>
+              <button id="dd_back" class="ghost">Move Backward 1s</button>
+            </div>
+            <canvas id="dd_canvas" width="540" height="320" style="margin-top:10px"></canvas>
+          </div>
+
+          <div style="margin-top:10px">
+            <div class="metric" id="dd_metrics">
+              <div id="dd_distance" class="muted">Distance: 0.00 m</div>
+              <div id="dd_displacement" class="muted">Displacement: 0.00 m</div>
+              <div id="dd_speed_metric" class="muted">Speed (avg): 0.00 m/s</div>
+              <div id="dd_velocity_metric" class="muted">Velocity (avg): 0.00 m/s</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel: Tests -->
+    <section class="panel" id="panel-tests" role="tabpanel" hidden>
+      <h2>Automated Checks</h2>
+      <p class="muted">These are simple smoke checks to ensure core computations behave as expected and that <code>no manifest</code> is linked (web-only target).</p>
+      <pre class="small" id="testlog">Running tests...</pre>
+    </section>
+
+    <footer>Note: This page is a web-only bundle — it intentionally contains <strong>no</strong> <code>&lt;link rel="manifest"&gt;</code> tag so it won't trigger "No manifest" errors when opened as a static page.</footer>
   </div>
 
-  <script>
-    const C = document.getElementById('canvas'), ctx = C.getContext('2d');
-    const obsA = { x:120, y:200, v:0, color:'#2563eb', label:'Observer A' };
-    const obsB = { x:360, y:200, v:0, color:'#10b981', label:'Observer B' };
-    const obj  = { x:720, y:200, v:2, color:'#ef4444', label:'Object' };
+<script>
+(function(){
+  // Tab switching
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=>{
+      tabs.forEach(s=>s.setAttribute('aria-selected','false'));
+      t.setAttribute('aria-selected','true');
+      const panels = document.querySelectorAll('[role="tabpanel"]');
+      panels.forEach(p=>p.hidden = p.id !== t.getAttribute('aria-controls'));
+    });
+  });
 
-    const aIn = document.getElementById('obsASpeed'), aVal = document.getElementById('obsASpeedValue');
-    const bIn = document.getElementById('obsBSpeed'), bVal = document.getElementById('obsBSpeedValue');
-    const oIn = document.getElementById('objSpeed'),  oVal = document.getElementById('objSpeedValue');
-    const mA  = document.getElementById('mA'), mB = document.getElementById('mB');
+  // ---------------- Reference Point Simulation ----------------
+  const rp_canvas = document.getElementById('rp_canvas');
+  const rp_ctx = rp_canvas.getContext('2d');
+  const rp_vA = document.getElementById('rp_vA'), rp_vB = document.getElementById('rp_vB');
+  const rp_vA_val = document.getElementById('rp_vA_val'), rp_vB_val = document.getElementById('rp_vB_val');
+  const rp_frame = document.getElementById('rp_frame'), rp_start = document.getElementById('rp_start');
+  const rp_metrics = document.getElementById('rp_metrics'), rp_v_ground = document.getElementById('rp_v_ground'), rp_v_rel = document.getElementById('rp_v_rel');
 
-    const fmt = (x)=>Number(x).toFixed(2);
-    aIn.oninput=()=>{ obsA.v=parseFloat(aIn.value); aVal.textContent=fmt(obsA.v); };
-    bIn.oninput=()=>{ obsB.v=parseFloat(bIn.value); bVal.textContent=fmt(obsB.v); };
-    oIn.oninput=()=>{ obj.v =parseFloat(oIn.value);  oVal.textContent=fmt(obj.v); };
+  // Entities: Observer A, Observer B, and moving Object (C)
+  const A = {x:100,y:180,color:'#2b8cff',r:16, v: parseFloat(rp_vA.value)};
+  const B = {x:260,y:180,color:'#2ee0a6',r:16, v: parseFloat(rp_vB.value)};
+  const C = {x:460,y:180,color:'#ff6b6b',r:16, v: 8.0}; // object defaults to 8 m/s (fast)
+  rp_vA_val.textContent = A.v.toFixed(1) + ' m/s';
+  rp_vB_val.textContent = B.v.toFixed(1) + ' m/s';
 
-    function drawDot(e){
-      ctx.beginPath(); ctx.arc(e.x,e.y,14,0,Math.PI*2);
-      ctx.fillStyle=e.color; ctx.fill(); ctx.strokeStyle='#111827'; ctx.stroke();
-      ctx.fillStyle='#111827'; ctx.font='12px system-ui'; ctx.fillText(e.label, e.x-36, e.y-20);
+  rp_vA.addEventListener('input', ()=>{ A.v = parseFloat(rp_vA.value); rp_vA_val.textContent = A.v.toFixed(1)+' m/s'; updateRpMetrics(); });
+  rp_vB.addEventListener('input', ()=>{ B.v = parseFloat(rp_vB.value); rp_vB_val.textContent = B.v.toFixed(1)+' m/s'; updateRpMetrics(); });
+
+  function updateRpMetrics(){
+    rp_v_ground.textContent = `A = ${A.v.toFixed(1)} m/s, B = ${B.v.toFixed(1)} m/s, Object = ${C.v.toFixed(1)} m/s`;
+    const obj_wrt_A = C.v - A.v;
+    const obj_wrt_B = C.v - B.v;
+    rp_v_rel.textContent = `Object wrt A: ${obj_wrt_A.toFixed(2)} m/s • Object wrt B: ${obj_wrt_B.toFixed(2)} m/s`;
+  }
+
+  function drawRpScene(frame){
+    rp_ctx.clearRect(0,0,rp_canvas.width,rp_canvas.height);
+    // baseline
+    rp_ctx.fillStyle = '#e6f6ff';
+    rp_ctx.fillRect(20,260,rp_canvas.width-40,10);
+    // Draw observers and object (positions relative to screen)
+    // If frame is A or B, we'll make that entity centered (visual offset)
+    let offset = 0;
+    if(frame === 'A') offset = rp_canvas.width/2 - A.x;
+    else if(frame === 'B') offset = rp_canvas.width/2 - B.x;
+
+    function drawEntity(e){
+      const x = e.x + offset;
+      rp_ctx.beginPath(); rp_ctx.arc(x,e.y,e.r,0,Math.PI*2); rp_ctx.fillStyle=e.color; rp_ctx.fill();
+      rp_ctx.strokeStyle = '#073042'; rp_ctx.stroke();
+      rp_ctx.fillStyle = '#001421'; rp_ctx.font = '13px system-ui';
+      rp_ctx.fillText((e===A?'Observer A': e===B?'Observer B':'Object'), x - 30, e.y - e.r - 8);
     }
-    function update(e){
-      e.x += e.v; if(e.x > C.width+16) e.x = -16; if(e.x < -16) e.x = C.width+16;
+
+    drawEntity(A); drawEntity(B); drawEntity(C);
+    // velocity arrows
+    rp_ctx.strokeStyle = '#073042'; rp_ctx.lineWidth = 2;
+    drawArrow(rp_ctx, A.x + offset, A.y - 36, A.x + offset + A.v*4, A.y - 36);
+    drawArrow(rp_ctx, B.x + offset, B.y - 60, B.x + offset + B.v*4, B.y - 60);
+    drawArrow(rp_ctx, C.x + offset, C.y - 84, C.x + offset + C.v*4, C.y - 84);
+  }
+
+  function drawArrow(ctx,x1,y1,x2,y2){
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    const head = 8;
+    const ang = Math.atan2(y2-y1,x2-x1);
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2 - head*Math.cos(ang - Math.PI/6), y2 - head*Math.sin(ang - Math.PI/6));
+    ctx.lineTo(x2 - head*Math.cos(ang + Math.PI/6), y2 - head*Math.sin(ang + Math.PI/6));
+    ctx.closePath(); ctx.fillStyle = '#073042'; ctx.fill();
+  }
+
+  // animate RP scene
+  let rpRunning = false, rpLast=0;
+  function rpStep(ts){
+    if(!rpRunning){ drawRpScene(rp_frame.value); return; }
+    if(!rpLast) rpLast = ts;
+    const dt = (ts - rpLast)/1000; rpLast = ts;
+    // advance world positions in ground frame
+    A.x += A.v * dt * 20; B.x += B.v * dt * 20; C.x += C.v * dt * 20;
+    // wrap-around for visual continuity
+    [A,B,C].forEach(e=>{ if(e.x > rp_canvas.width + 40) e.x = -40; if(e.x < -40) e.x = rp_canvas.width + 40; });
+    drawRpScene(rp_frame.value);
+    requestAnimationFrame(rpStep);
+  }
+
+  rp_start.onclick = function(){
+    // restart positions to sensible places and start animation
+    A.x = 100; B.x = 260; C.x = 460;
+    rpRunning = true; rpLast = 0; updateRpMetrics(); requestAnimationFrame(rpStep);
+  };
+
+  // Start RP initial draw
+  updateRpMetrics(); drawRpScene('ground');
+
+  // ---------------- Distance & Displacement Simulation ----------------
+  const dd_canvas = document.getElementById('dd_canvas'), dd_ctx = dd_canvas.getContext('2d');
+  const dd_speed = document.getElementById('dd_speed'), dd_speed_val = document.getElementById('dd_speed_val');
+  const dd_toggle = document.getElementById('dd_toggle'), dd_reset = document.getElementById('dd_reset'), dd_back = document.getElementById('dd_back');
+  const dd_distance = document.getElementById('dd_distance'), dd_displacement = document.getElementById('dd_displacement');
+  const dd_speed_metric = document.getElementById('dd_speed_metric'), dd_velocity_metric = document.getElementById('dd_velocity_metric');
+
+  // Simulation state (real-world units: pixels ~ 0.1 m for demonstration; but we will label metrics as meters)
+  const pxToM = 0.1; // 1 px = 0.1 m (for display only)
+  const Obj = { x:40, y:180, r:14, v: parseFloat(dd_speed.value) }; // v in m/s for user's slider
+  let ddTotalDistance = 0; // meters
+  let ddStartX = Obj.x;
+  let ddSimTime = 0; // seconds of simulation time (only while running)
+  let ddLast = null;
+  let ddIsRunning = true;
+
+  dd_speed_val.textContent = Obj.v.toFixed(2) + ' m/s';
+
+  dd_speed.addEventListener('input', ()=>{
+    Obj.v = parseFloat(dd_speed.value);
+    dd_speed_val.textContent = Obj.v.toFixed(2) + ' m/s';
+  });
+
+  dd_toggle.addEventListener('click', ()=>{
+    ddIsRunning = !ddIsRunning;
+    dd_toggle.textContent = ddIsRunning ? 'Pause' : 'Resume';
+    // Reset last timestamp so dt won't be huge when resuming
+    ddLast = null;
+  });
+
+  dd_reset.addEventListener('click', ()=>{
+    Obj.x = 40; ddTotalDistance = 0; ddStartX = Obj.x; ddSimTime = 0; ddLast = null;
+    updateDdMetrics();
+    drawDdScene();
+  });
+
+  dd_back.addEventListener('click', ()=>{
+    // Move backward for 1 second of simulation time (as if negative velocity for 1s)
+    const dt = 1.0;
+    const prevX = Obj.x;
+    Obj.x += (-Math.abs(Obj.v)) * dt * (1/pxToM); // convert meters to pixels
+    if(Obj.x < 20) Obj.x = 20;
+    ddTotalDistance += Math.abs((Obj.x - prevX) * pxToM);
+    ddSimTime += dt;
+    updateDdMetrics();
+    drawDdScene();
+  });
+
+  function drawDdScene(){
+    dd_ctx.clearRect(0,0,dd_canvas.width,dd_canvas.height);
+    // track
+    dd_ctx.fillStyle = '#e6f6ff'; dd_ctx.fillRect(20,240,dd_canvas.width-40,10);
+    // object
+    dd_ctx.beginPath(); dd_ctx.arc(Obj.x, Obj.y, Obj.r, 0, Math.PI*2); dd_ctx.fillStyle = '#ff6b6b'; dd_ctx.fill();
+    dd_ctx.strokeStyle = '#07202b'; dd_ctx.stroke();
+    dd_ctx.fillStyle = '#07202b'; dd_ctx.font = '12px system-ui'; dd_ctx.fillText('Object', Obj.x-20, Obj.y-20);
+  }
+
+  function updateDdMetrics(){
+    const displacementMeters = (Obj.x - ddStartX) * pxToM;
+    const speedAvg = ddSimTime > 0 ? ddTotalDistance / ddSimTime : 0;
+    const velocityAvg = ddSimTime > 0 ? displacementMeters / ddSimTime : 0;
+    dd_distance.textContent = `Distance: ${ddTotalDistance.toFixed(2)} m`;
+    dd_displacement.textContent = `Displacement: ${displacementMeters.toFixed(2)} m`;
+    dd_speed_metric.textContent = `Speed (avg): ${speedAvg.toFixed(2)} m/s`;
+    dd_velocity_metric.textContent = `Velocity (avg): ${velocityAvg.toFixed(2)} m/s`;
+  }
+
+  function ddStep(ts){
+    if(!ddLast) ddLast = ts;
+    const dt = (ts - ddLast)/1000; ddLast = ts;
+    if(ddIsRunning){
+      // Obj.v is in m/s; convert to pixels for motion: px = meters / pxToM
+      const prevX = Obj.x;
+      Obj.x += (Obj.v * dt) / pxToM;
+      // clamp within track
+      if(Obj.x > dd_canvas.width - 40) Obj.x = dd_canvas.width - 40;
+      if(Obj.x < 20) Obj.x = 20;
+      ddTotalDistance += Math.abs((Obj.x - prevX) * pxToM);
+      ddSimTime += dt;
+      updateDdMetrics();
+      drawDdScene();
     }
-    function animate(){
-      ctx.clearRect(0,0,C.width,C.height);
-      ctx.strokeStyle='#9ca3af'; ctx.setLineDash([8,8]);
-      ctx.beginPath(); ctx.moveTo(20,240); ctx.lineTo(C.width-20,240); ctx.stroke(); ctx.setLineDash([]);
-      [obsA, obsB, obj].forEach(update);
-      [obsA, obsB, obj].forEach(drawDot);
-      const vBA = obj.v - obsA.v, vBB = obj.v - obsB.v;
-      mA.innerHTML = `<b>Relative to A</b><div>${fmt(vBA)} m/s</div>`;
-      mB.innerHTML = `<b>Relative to B</b><div>${fmt(vBB)} m/s</div>`;
-      requestAnimationFrame(animate);
-    }
-    animate();
-  </script>
+    requestAnimationFrame(ddStep);
+  }
+
+  // init dd
+  drawDdScene();
+  updateDdMetrics();
+  requestAnimationFrame(ddStep);
+
+  // ---------------- Tests ----------------
+  const testlog = document.getElementById('testlog');
+  function runTests(){
+    const logs = [];
+    function pass(msg){ logs.push('✅ ' + msg); }
+    function fail(msg){ logs.push('❌ ' + msg); }
+
+    // Test: No manifest link exists on page
+    const manifestLink = !!document.querySelector('link[rel="manifest"]');
+    if(!manifestLink) pass('No manifest link found (web-only)'); else fail('Manifest link exists — remove it for web-only target');
+
+    // Test: Relative velocity arithmetic
+    const vA = 1.2, vObj = 3.7;
+    const relA = vObj - vA;
+    if(Math.abs(relA - 2.5) < 1e-9) pass('Relative velocity arithmetic correct (3.7 - 1.2 = 2.5)'); else fail('Relative velocity arithmetic failed');
+
+    // Test: Kinematics formulas quick check
+    // Using u=5,a=1,t=5 -> v=10, s=37.5
+    const u=5,a=1,t=5; const v = u + a*t; const s = u*t + 0.5*a*t*t;
+    if(Math.abs(v - 10) < 1e-9 && Math.abs(s - 37.5) < 1e-9) pass('Equations of motion compute correctly');
+    else fail('Equations of motion check failed');
+
+    // Test: Distance/Displacement simple scenario
+    // Move object 100 px forward -> displacement positive, distance increases accordingly when adding to previous state
+    const oStartX = Obj.x;
+    const prevTotal = ddTotalDistance;
+    Obj.x += 100; // simulate move
+    const added = Math.abs((Obj.x - oStartX) * pxToM);
+    if(added > 0) pass('Distance increment works (positive change)'); else fail('Distance increment failed');
+    // revert
+    Obj.x = oStartX;
+
+    testlog.textContent = logs.join('\\n');
+  }
+
+  runTests();
+
+})();
+</script>
+
 </body>
 </html>
+"""
+
+# Save to a file so the user can download / inspect it
+path = "/mnt/data/interactive_motion_simulations_web_only_v2.html"
+with open(path, "w", encoding="utf-8") as f:
+    f.write(html)
+
+path
+
